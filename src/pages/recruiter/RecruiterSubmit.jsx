@@ -376,7 +376,6 @@ export default function RecruiterSubmit() {
 
               {activeSection === "assignedRequirements" && (
                 <>
-                  {/* <h4 className="text-primary mb-3">Assigned Requirements</h4> */}
                   {filteredRequirements.length === 0 ? (
                     <p>No matching requirements found.</p>
                   ) : (
@@ -388,7 +387,8 @@ export default function RecruiterSubmit() {
                             <th>Title</th>
                             <th>Location</th>
                             <th>Rate</th>
-                            <th>Priority</th> {/* 👈 New column */}
+                            <th>Duration</th> {/* ✅ New column */}
+                            <th>Priority</th>
                             <th>Employment Type</th>
                             <th>Work Authorization</th>
                             <th>Work Setting</th>
@@ -414,31 +414,34 @@ export default function RecruiterSubmit() {
                                   <td>{req.requirementId}</td>
                                   <td>{req.title}</td>
                                   <td>{req.locations?.join(", ")}</td>
-                                  <td>{req.rate}</td>
-                                  <td>{req.priority || "N/A"}</td> {/* 👈 New cell for priority */}
+                                  <td>{req.rate || "N/A"}</td>
+                                  <td>{req.duration || "N/A"}</td> {/* ✅ Duration value */}
+                                  <td>{req.priority || "N/A"}</td>
                                   <td>{req.employmentType}</td>
                                   <td>
                                     {Array.isArray(req.workAuthorization)
                                       ? req.workAuthorization.join(", ")
                                       : req.workAuthorization}
                                   </td>
-
                                   <td>{req.workSetting}</td>
-
                                   <td>{new Date(req.createdAt).toLocaleDateString()}</td>
                                   <td>
-                                    <span className={`badge ${req.status === "closed" ? "bg-danger" : "bg-success"}`}>
+                                    <span
+                                      className={`badge ${req.status === "closed" ? "bg-danger" : "bg-success"
+                                        }`}
+                                    >
                                       {req.requirementStatus?.toUpperCase() || "OPEN"}
                                     </span>
                                   </td>
-
                                   <td>{req.createdBy}</td>
                                   <td>{submissionCount}</td>
                                   <td>
                                     <button
                                       className="btn btn-sm btn-primary"
                                       onClick={() =>
-                                        setExpandedReq(expandedReq === req._id ? null : req._id)
+                                        setExpandedReq(
+                                          expandedReq === req._id ? null : req._id
+                                        )
                                       }
                                     >
                                       {expandedReq === req._id ? "Hide" : "View"}
@@ -448,7 +451,7 @@ export default function RecruiterSubmit() {
 
                                 {expandedReq === req._id && (
                                   <tr>
-                                    <td colSpan="10">
+                                    <td colSpan="14">
                                       <div className="p-2">
                                         <p>
                                           <strong>Skills:</strong> {req.primarySkills}
@@ -459,7 +462,11 @@ export default function RecruiterSubmit() {
                                         <button
                                           className="btn btn-outline-success btn-sm"
                                           onClick={() =>
-                                            onApplyClick(req._id, req.requirementId, req.title)
+                                            onApplyClick(
+                                              req._id,
+                                              req.requirementId,
+                                              req.title
+                                            )
                                           }
                                         >
                                           Apply
@@ -473,9 +480,12 @@ export default function RecruiterSubmit() {
                           })}
                         </tbody>
                       </table>
+
                       <div className="d-flex justify-content-between align-items-center mt-2">
                         <div>
-                          Showing {indexOfFirstReq + 1}–{Math.min(indexOfLastReq, filteredRequirements.length)} of {filteredRequirements.length} requirements
+                          Showing {indexOfFirstReq + 1}–
+                          {Math.min(indexOfLastReq, filteredRequirements.length)} of{" "}
+                          {filteredRequirements.length} requirements
                         </div>
                         <div>
                           <button
@@ -485,7 +495,9 @@ export default function RecruiterSubmit() {
                           >
                             ◀ Prev
                           </button>
-                          <span>Page {requirementsPage} of {totalReqPages}</span>
+                          <span>
+                            Page {requirementsPage} of {totalReqPages}
+                          </span>
                           <button
                             className="btn btn-sm btn-outline-secondary ms-2"
                             disabled={requirementsPage === totalReqPages}
@@ -499,6 +511,7 @@ export default function RecruiterSubmit() {
                   )}
                 </>
               )}
+
               {/* <li className="nav-item">
                   <button
                     className={`nav-link ${
