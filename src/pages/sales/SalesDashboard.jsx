@@ -22,7 +22,8 @@ export default function SalesDashboard() {
     primarySkills: "",
     priority: "",
     client: "",
-    workAuthorization: "",
+    workAuthorization: [],
+    duration: "",
   });
 
   const [showForm, setShowForm] = useState(false);
