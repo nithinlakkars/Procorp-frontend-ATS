@@ -12,6 +12,7 @@ const requiredFields = [
   "locations",
   "employmentType",
   "workSetting",
+  "duration",
   "rate",
   "primarySkills",
   "workAuthorization",
@@ -240,6 +241,19 @@ export default function RequirementForm({
             </select>
           </div>
         </div>
+<div className="mb-2">
+  <select
+    name="duration"
+    className="form-select"
+    value={form.duration}
+    onChange={handleChange}
+    required
+  >
+    <option value="">Select Duration</option>
+    <option value="longterm">Long Term</option>
+    <option value="shortterm">Short Term</option>
+  </select>
+</div>
 
         <input
           type="text"
