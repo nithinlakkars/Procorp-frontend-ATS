@@ -54,6 +54,10 @@ export default function RequirementForm({
       setErrorMsg("❌ Please fill all required fields");
       return;
     }
+    if (!form.workAuthorization || form.workAuthorization.length === 0) {
+      setErrorMsg("❌ Please select at least one work authorization");
+      return;
+    }
 
     try {
       setLoading(true);
@@ -75,7 +79,7 @@ export default function RequirementForm({
         workSetting: "",
         rate: "",
         primarySkills: "",
-        workAuthorization: "",
+        workAuthorization: [],
         client: "",
       });
       setLocationSearch("");
@@ -247,20 +251,24 @@ export default function RequirementForm({
           required
         />
 
-        <select
-          name="workAuthorization"
-          className="form-select mb-2"
-          value={form.workAuthorization}
-          onChange={handleChange}
-          required
-        >
-          <option value="">Select Work Authorization</option>
-          <option value="US Citizen">US Citizen</option>
-          <option value="Green Card">Green Card</option>
-          <option value="H1B">H1B</option>
-          <option value="OPT">OPT</option>
-          <option value="EAD">EAD</option>
-        </select>
+        <label className="fw-bold mt-3">Work Authorization:</label>
+        <div className="mb-2 d-flex flex-wrap">
+          {["US Citizen", "Green Card", "H1B", "OPT", "EAD"].map((auth) => (
+            <div key={auth} className="form-check me-3 mb-1">
+              <input
+                type="checkbox"
+                className="form-check-input"
+                id={`wa-${auth}`}
+                checked={(form.workAuthorization || []).includes(auth)}
+                onChange={() => handleMultiCheckbox("workAuthorization", auth)}
+              />
+              <label className="form-check-label" htmlFor={`wa-${auth}`}>
+                {auth}
+              </label>
+            </div>
+          ))}
+        </div>
+
 
         <select
           name="rate"
