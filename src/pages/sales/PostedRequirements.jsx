@@ -239,6 +239,9 @@ export default function PostedRequirements({ onCountUpdate }) {
             <strong>Work Setting:</strong> {selectedReq?.workSetting || "N/A"}
           </p>
           <p>
+            <strong>Duration:</strong> {selectedReq?.duration || "N/A"}
+          </p>
+          <p>
             <strong>Work Authorization:</strong>{" "}
             {Array.isArray(selectedReq?.workAuthorization)
               ? selectedReq.workAuthorization.join(", ")
