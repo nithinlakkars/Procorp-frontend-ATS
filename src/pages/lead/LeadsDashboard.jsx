@@ -51,15 +51,15 @@ export default function LeadsDashboard() {
 
   const handleMultiCheckbox = (field, value) => {
     setForm((prev) => {
-      const current = prev[field];
-      return {
-        ...prev,
-        [field]: current.includes(value)
-          ? current.filter((v) => v !== value)
-          : [...current, value],
-      };
+      const arr = Array.isArray(prev[field]) ? prev[field] : [];
+      if (arr.includes(value)) {
+        return { ...prev, [field]: arr.filter((item) => item !== value) };
+      } else {
+        return { ...prev, [field]: [...arr, value] };
+      }
     });
   };
+
 
   useEffect(() => {
     const user = sessionStorage.getItem("user");
