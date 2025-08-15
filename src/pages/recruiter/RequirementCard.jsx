@@ -64,6 +64,9 @@ function RequirementCard({
           <strong>Rate:</strong> {req.rate || "N/A"}
         </p>
         <p>
+          <strong>Duration:</strong> {req.duration || "N/A"}   {/* ✅ Added duration */}
+        </p>
+        <p>
           <strong>Priority:</strong>{" "}
           <span className="text-danger">{req.priority || "N/A"}</span>
         </p>
@@ -77,15 +80,15 @@ function RequirementCard({
           <strong>Setting:</strong> {req.workSetting || "N/A"}
         </p>
         <p>
-  <strong>Work Authorization:</strong>{" "}
-  {{
-    USC: "US Citizen",
-    GC: "Green Card",
-    H1B: "H1B",
-    OPT: "OPT/CPT",
-    Other: "Other",
-  }[req.workAuthorization] || req.workAuthorization || "N/A"}
-</p>
+          <strong>Work Authorization:</strong>{" "}
+          {{
+            USC: "US Citizen",
+            GC: "Green Card",
+            H1B: "H1B",
+            OPT: "OPT/CPT",
+            Other: "Other",
+          }[req.workAuthorization] || req.workAuthorization || "N/A"}
+        </p>
 
 
         <button
@@ -123,15 +126,15 @@ export default function RequirementCardWithPagination({
   const [currentPage, setCurrentPage] = useState(1);
   const requirementsPerPage = 5;
 
- const sortedRequirements = [...requirements].sort(
-  (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-);
-const totalPages = Math.ceil(sortedRequirements.length / requirementsPerPage);
-const startIndex = (currentPage - 1) * requirementsPerPage;
-const currentReqs = sortedRequirements.slice(
-  startIndex,
-  startIndex + requirementsPerPage
-);
+  const sortedRequirements = [...requirements].sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  );
+  const totalPages = Math.ceil(sortedRequirements.length / requirementsPerPage);
+  const startIndex = (currentPage - 1) * requirementsPerPage;
+  const currentReqs = sortedRequirements.slice(
+    startIndex,
+    startIndex + requirementsPerPage
+  );
 
   return (
     <>
