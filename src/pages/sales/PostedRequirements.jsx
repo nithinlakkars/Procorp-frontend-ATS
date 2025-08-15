@@ -14,81 +14,81 @@ export default function PostedRequirements({ onCountUpdate }) {
   const [loading, setLoading] = useState(false);
   const reqsPerPage = 5;
 
-useEffect(() => {
-  console.log("📣 useEffect triggered");
-  loadRequirements();
-}, []);
+  useEffect(() => {
+    console.log("📣 useEffect triggered");
+    loadRequirements();
+  }, []);
 
-const loadRequirements = async () => {
-  try {
-    console.log("🟡 loadRequirements called");
+  const loadRequirements = async () => {
+    try {
+      console.log("🟡 loadRequirements called");
 
-    setLoading(true);
+      setLoading(true);
 
-    const [requirementsRes, candidatesRes] = await Promise.all([
-      fetchSalesRequirements(),
-      getAllCandidates(),
-    ]);
+      const [requirementsRes, candidatesRes] = await Promise.all([
+        fetchSalesRequirements(),
+        getAllCandidates(),
+      ]);
 
-    console.log("✅ fetchSalesRequirements response:", requirementsRes);
-    console.log("✅ getAllCandidates response:", candidatesRes);
+      console.log("✅ fetchSalesRequirements response:", requirementsRes);
+      console.log("✅ getAllCandidates response:", candidatesRes);
 
-    // ✅ Adjust based on whether requirementsRes is already an array
-    const requirementData = Array.isArray(requirementsRes)
-      ? requirementsRes
-      : requirementsRes?.data || [];
+      // ✅ Adjust based on whether requirementsRes is already an array
+      const requirementData = Array.isArray(requirementsRes)
+        ? requirementsRes
+        : requirementsRes?.data || [];
 
-    // ✅ Extract candidates
-    const candidates = Array.isArray(candidatesRes?.candidates)
-      ? candidatesRes.candidates
-      : candidatesRes?.data?.candidates || [];
+      // ✅ Extract candidates
+      const candidates = Array.isArray(candidatesRes?.candidates)
+        ? candidatesRes.candidates
+        : candidatesRes?.data?.candidates || [];
 
-    console.log("🧾 Cleaned requirement data:", requirementData);
-    console.log("🧾 Cleaned candidates data:", candidates);
+      console.log("🧾 Cleaned requirement data:", requirementData);
+      console.log("🧾 Cleaned candidates data:", candidates);
 
-    // 🔁 Build submission count map
-    const submissionMap = {};
-    candidates.forEach((candidate) => {
-      const reqIds = Array.isArray(candidate.requirementId)
-        ? candidate.requirementId
-        : [candidate.requirementId];
+      // 🔁 Build submission count map
+      const submissionMap = {};
+      candidates.forEach((candidate) => {
+        const reqIds = Array.isArray(candidate.requirementId)
+          ? candidate.requirementId
+          : [candidate.requirementId];
 
-      reqIds.forEach((reqId) => {
-        const trimmed = reqId?.trim?.();
-        if (trimmed) {
-          submissionMap[trimmed] = (submissionMap[trimmed] || 0) + 1;
-        }
+        reqIds.forEach((reqId) => {
+          const trimmed = reqId?.trim?.();
+          if (trimmed) {
+            submissionMap[trimmed] = (submissionMap[trimmed] || 0) + 1;
+          }
+        });
       });
-    });
 
-    // 🏗️ Enrich requirements with submission count
-    const enrichedRequirements = requirementData.map((req) => {
-      const count = submissionMap[req.requirementId?.trim()] || 0;
-      return { ...req, submissionCount: count };
-    });
+      // 🏗️ Enrich requirements with submission count
+      const enrichedRequirements = requirementData.map((req) => {
+        const count = submissionMap[req.requirementId?.trim()] || 0;
+        return { ...req, submissionCount: count };
+      });
 
-    setSubmittedReqs(enrichedRequirements);
-    onCountUpdate?.(enrichedRequirements.length);
-  } catch (error) {
-    console.error("❌ Failed to load requirements or candidates:", error);
-  } finally {
-    setLoading(false);
-  }
-};
-
+      setSubmittedReqs(enrichedRequirements);
+      onCountUpdate?.(enrichedRequirements.length);
+    } catch (error) {
+      console.error("❌ Failed to load requirements or candidates:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
-const handleStatusChange = async (requirementId, newStatus) => {
-  try {
-    await updateRequirementStatus(requirementId, newStatus);
 
-    // ✅ Refetch updated requirements
-    await loadRequirements(); // reloads everything including submissionCount
-   
-  } catch (err) {
-    console.error("Failed to update requirement status", err);
-  }
-};
+  const handleStatusChange = async (requirementId, newStatus) => {
+    try {
+      await updateRequirementStatus(requirementId, newStatus);
+
+      // ✅ Refetch updated requirements
+      await loadRequirements(); // reloads everything including submissionCount
+
+    } catch (err) {
+      console.error("Failed to update requirement status", err);
+    }
+  };
 
   const filteredReqs = submittedReqs.filter((req) => {
     const query = searchQuery.toLowerCase();
@@ -134,6 +134,7 @@ const handleStatusChange = async (requirementId, newStatus) => {
               <th>Position</th>
               <th>Client</th>
               <th>Priority</th>
+              <th>Duration</th> {/* <-- New column */}
               <th>Assigned Lead(s)</th>
               <th>Assigned Recruiter(s)</th>
               <th>Submitted Count</th>
@@ -168,6 +169,7 @@ const handleStatusChange = async (requirementId, newStatus) => {
                   </td>
                   <td>{req.client || "N/A"}</td>
                   <td>{req.priority || "N/A"}</td>
+                  <td>{req.duration || "N/A"}</td>
                   <td>
                     {Array.isArray(req.leadAssignedTo)
                       ? req.leadAssignedTo.join(", ")
