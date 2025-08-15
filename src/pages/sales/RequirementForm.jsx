@@ -12,7 +12,8 @@ const requiredFields = [
   "rate",
   "primarySkills",
   "client",
-  "workAuthorization"
+  "workAuthorization",
+  "duration"
 ];
 
 export default function RequirementForm({
@@ -73,7 +74,8 @@ export default function RequirementForm({
         workAuthorization: [],
         rate: "",
         primarySkills: "",
-        priority: ""
+        priority: "",
+        duration: ""
       });
       setLocationSearch("");
     } catch {
@@ -220,6 +222,19 @@ export default function RequirementForm({
               <option value="">Select Employment Type</option>
               <option value="W2">W2</option>
               <option value="C2C">C2C</option>
+            </select>
+          </div>
+          <div className="col-md-6 mb-2">
+            <select
+              name="duration"
+              className="form-select"
+              value={form.duration}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Select Duration</option>
+              <option value="Long Term">Long Term</option>
+              <option value="Short Term">Short Term</option>
             </select>
           </div>
 
