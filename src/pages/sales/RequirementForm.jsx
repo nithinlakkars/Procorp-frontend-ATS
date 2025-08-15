@@ -233,10 +233,13 @@ export default function RequirementForm({
               required
             >
               <option value="">Select Duration</option>
-              <option value="Long Term">Long Term</option>
-              <option value="Short Term">Short Term</option>
+              <option value="longterm">Long Term</option>
+              <option value="shortterm">Short Term</option>
             </select>
           </div>
+
+
+
 
           <div className="col-md-6 mb-2">
             <select
