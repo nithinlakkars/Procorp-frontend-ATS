@@ -33,6 +33,7 @@ export default function LeadsDashboard() {
     locations: [],
     employmentType: "",
     workSetting: "",
+    duration: "",
     rate: "",
     primarySkills: "",
   });
