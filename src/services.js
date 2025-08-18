@@ -137,6 +137,17 @@ export const fetchAllRequirements = async () => {
     },
   });
 };
+export const fetchLeadRequirements = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/api/requirements/leads/my`, {
+      headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("❌ Error fetching lead requirements:", error);
+    return error;
+  }
+};
 
 // 5️⃣ Fetch candidates submitted by recruiters to Lead
 export const fetchCandidates = async () => {
