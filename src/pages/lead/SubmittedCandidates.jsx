@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Table, Button, Collapse, Badge } from "react-bootstrap";
+import { Table, Button, Collapse, Badge, Form } from "react-bootstrap";
+
 
 export default function SubmittedCandidates({
   candidates = [],
@@ -43,6 +44,19 @@ export default function SubmittedCandidates({
     );
   };
 
+  // <-- Add handleStatusChange here
+  const handleStatusChange = async (candidateId, newStatus) => {
+    try {
+      // Call your API to update candidate status in backend
+      await updateCandidateStatus(candidateId, newStatus);
+
+      // Reload candidates after update
+      await loadCandidates();
+    } catch (err) {
+      console.error("❌ Failed to update candidate status:", err);
+      setMessage("❌ Failed to update status");
+    }
+  };
   const visibleFields = [
     "candidateId",
     "name",
@@ -176,6 +190,7 @@ export default function SubmittedCandidates({
                       <option value="submitted">Submitted</option>
                     </Form.Select>
                   </td>
+
 
                   <td>
                     <Button
