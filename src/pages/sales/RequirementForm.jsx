@@ -152,7 +152,7 @@ export default function RequirementForm({
                   type="checkbox"
                   className="form-check-input"
                   id={`lead-${lead.email}`}
-                  checked={form.leadAssignedTo.includes(lead.email)}
+                  checked={form.leadAssignedTo?.includes(lead.email) || false}
                   onChange={() => handleMultiCheckbox("leadAssignedTo", lead.email)}
                 />
                 <label className="form-check-label" htmlFor={`lead-${lead.email}`}>
@@ -174,7 +174,7 @@ export default function RequirementForm({
                   type="checkbox"
                   className="form-check-input"
                   id={`recruiter-${recruiter.email}`}
-                  checked={form.recruiterAssignedTo.includes(recruiter.email)}
+                  checked={form.recruiterAssignedTo?.includes(recruiter.email) || false}
                   onChange={() => handleMultiCheckbox("recruiterAssignedTo", recruiter.email)}
                 />
                 <label className="form-check-label" htmlFor={`recruiter-${recruiter.email}`}>
@@ -212,7 +212,7 @@ export default function RequirementForm({
           </div>
         )}
 
-        {form.locations.length > 0 && (
+        {form.locations?.length > 0 && (
           <div className="mb-2 d-flex flex-wrap">
             {form.locations.map((loc) => (
               <span key={loc} className="badge bg-success me-2 mb-1 d-flex align-items-center">
@@ -302,9 +302,9 @@ export default function RequirementForm({
                     type="checkbox"
                     id={`wa-${option}`}
                     value={option}
-                    checked={form.workAuthorization.includes(option)}
+                    checked={form.workAuthorization?.includes(option) || false}
                     onChange={handleWorkAuthCheckbox}
-                    required={form.workAuthorization.length === 0}
+                    required={form.workAuthorization?.length === 0}
                   />
                   <label className="form-check-label" htmlFor={`wa-${option}`}>
                     {option}
@@ -356,4 +356,5 @@ export default function RequirementForm({
       </form>
     </div>
   );
+
 }
