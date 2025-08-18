@@ -18,15 +18,27 @@ export default function RequirementHistory() {
       setLoading(true);
       console.log("⏳ Fetching requirements and candidates...");
 
-      const [requirementsRes, candidatesRes] = await Promise.all([
+      const [salesRes, leadRes, candidatesRes] = await Promise.all([
         fetchAllRequirements(),
+        fetchLeadRequirements(),
         getAllCandidates(),
       ]);
 
-      const requirements = Array.isArray(requirementsRes?.data)
-        ? requirementsRes.data
-        : [];
+      // Normalize Sales & Lead requirements
+      const salesRequirements = Array.isArray(salesRes?.data)
+        ? salesRes.data
+        : Array.isArray(salesRes)
+          ? salesRes
+          : [];
 
+      const leadRequirements = Array.isArray(leadRes?.data)
+        ? leadRes.data
+        : Array.isArray(leadRes)
+          ? leadRes
+          : [];
+
+      // Merge both into one array
+      const requirements = [...salesRequirements, ...leadRequirements];
       const candidates = Array.isArray(candidatesRes?.candidates)
         ? candidatesRes.candidates
         : candidatesRes?.data?.candidates || [];
@@ -105,11 +117,10 @@ export default function RequirementHistory() {
                       {req.submissionCount} submitted
                     </span>
                     <span
-                      className={`badge ${
-                        req.requirementStatus === "closed"
-                          ? "bg-danger"
-                          : "bg-success"
-                      }`}
+                      className={`badge ${req.requirementStatus === "closed"
+                        ? "bg-danger"
+                        : "bg-success"
+                        }`}
                     >
                       {req.requirementStatus === "closed" ? "Closed" : "Open"}
                     </span>
