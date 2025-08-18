@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Card, Spinner } from "react-bootstrap";
 import axios from "axios";
-
-const API_URL = "http://localhost:5000/api/stats/sales-dashboard";
-const SALES_CANDIDATES_URL = "http://localhost:5000/api/candidates/sales";
+const API_URL = "https://procorp-ats-backend.onrender.com/api/stats/sales-dashboard";
+const SALES_CANDIDATES_URL = "https://procorp-ats-backend.onrender.com/api/candidates/sales";
 
 const AccountManagerDashboard = () => {
   const [stats, setStats] = useState(null);
