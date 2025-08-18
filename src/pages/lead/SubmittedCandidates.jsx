@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Table, Button, Collapse, Badge, Form } from "react-bootstrap";
-import { updateCandidateFields } from "../../services";
-
-
+import { updateCandidateLeadStatus } from "../../services";
 
 export default function SubmittedCandidates({
   candidates = [],
@@ -21,8 +19,6 @@ export default function SubmittedCandidates({
   }, []);
 
   useEffect(() => {
-    console.log("🔍 Total submitted candidates:", candidates.length);
-
     setCurrentPage(1);
   }, [candidates]);
 
@@ -46,19 +42,17 @@ export default function SubmittedCandidates({
     );
   };
 
-  // <-- Add handleStatusChange here
+  // Update handleStatusChange to use lead_update
   const handleStatusChange = async (candidateId, newStatus) => {
     try {
-      // Call your API to update candidate status in backend
-      await updateCandidateFields(candidateId, { candidate_update: newStatus });
-
-      // Reload candidates after update
+      await updateCandidateLeadStatus(candidateId, newStatus);
       await loadCandidates();
     } catch (err) {
       console.error("❌ Failed to update candidate status:", err);
       setMessage("❌ Failed to update status");
     }
   };
+
   const visibleFields = [
     "candidateId",
     "name",
@@ -120,7 +114,7 @@ export default function SubmittedCandidates({
             <th>Active</th>
             <th>Sales Status</th>
             <th>Sales Update</th>
-            <th>Update Status</th>
+            <th>Lead Update</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -135,7 +129,7 @@ export default function SubmittedCandidates({
 
                   {/* Resume URLs */}
                   <td>
-                    {candidate.resumeUrls && candidate.resumeUrls.length > 0 ? (
+                    {candidate.resumeUrls?.length > 0 ? (
                       <a
                         href={candidate.resumeUrls[0]}
                         target="_blank"
@@ -149,12 +143,10 @@ export default function SubmittedCandidates({
                     )}
                   </td>
 
-
                   {/* Active badge */}
                   <td>
                     <span
-                      className={`badge ${candidate.isActive ? "bg-success" : "bg-secondary"
-                        }`}
+                      className={`badge ${candidate.isActive ? "bg-success" : "bg-secondary"}`}
                     >
                       {candidate.isActive ? "Active" : "Inactive"}
                     </span>
@@ -167,17 +159,18 @@ export default function SubmittedCandidates({
                     </Badge>
                   </td>
 
-                  {/* Candidate Update */}
+                  {/* Sales Update */}
                   <td>
-                    <Badge bg={getStatusVariant(candidate.candidate_update)}>
-                      {candidate.candidate_update || "N/A"}
+                    <Badge bg={getStatusVariant(candidate.sales_update)}>
+                      {candidate.sales_update || "N/A"}
                     </Badge>
                   </td>
-                  {/* Update Status Dropdown */}
+
+                  {/* Lead Update */}
                   <td>
                     <Form.Select
                       size="sm"
-                      value={candidate.candidate_update || ""}
+                      value={candidate.lead_update || ""}
                       onChange={(e) => handleStatusChange(candidate._id, e.target.value)}
                     >
                       <option value="">Select</option>
@@ -191,9 +184,7 @@ export default function SubmittedCandidates({
                       <option value="submitted-to-client">Submitted to Client</option>
                       <option value="submitted">Submitted</option>
                     </Form.Select>
-
                   </td>
-
 
                   <td>
                     <Button
@@ -201,15 +192,13 @@ export default function SubmittedCandidates({
                       variant="link"
                       onClick={() => toggleExpand(candidate._id)}
                     >
-                      {expandedRows.includes(candidate._id)
-                        ? "Hide"
-                        : "View More"}
+                      {expandedRows.includes(candidate._id) ? "Hide" : "View More"}
                     </Button>
                   </td>
                 </tr>
 
                 <tr>
-                  <td colSpan={visibleFields.length + 5} className="p-0">
+                  <td colSpan={visibleFields.length + 6} className="p-0">
                     <Collapse in={expandedRows.includes(candidate._id)}>
                       <div className="p-3 bg-light text-dark">
                         {hiddenFields.map((field) => (
@@ -233,7 +222,7 @@ export default function SubmittedCandidates({
             ))
           ) : (
             <tr>
-              <td colSpan={visibleFields.length + 5} className="text-center">
+              <td colSpan={visibleFields.length + 6} className="text-center">
                 No candidates submitted yet.
               </td>
             </tr>
@@ -241,7 +230,6 @@ export default function SubmittedCandidates({
         </tbody>
       </Table>
 
-      {/* Pagination Controls */}
       {/* Pagination Controls */}
       <div className="d-flex justify-content-center align-items-center mt-3">
         <Button
@@ -266,8 +254,6 @@ export default function SubmittedCandidates({
           Next ▶
         </Button>
       </div>
-
-
-    </section >
+    </section>
   );
 }
