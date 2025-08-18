@@ -343,6 +343,31 @@ export const updateRequirementStatus = async (requirementId, newStatus) => {
   return res.data;
 };
 
+// Update lead_update field for a candidate
+export const updateCandidateLeadStatus = async (candidateId, leadStatus) => {
+  const token = sessionStorage.getItem("token");
+
+  try {
+    const response = await axios.put(
+      `${API_URL}/api/candidates/recruiter/update-fields`,
+      { candidateId, lead_update: leadStatus },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error(
+      "❌ Error updating lead status for candidate:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
 
 
 
