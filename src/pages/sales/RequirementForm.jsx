@@ -5,7 +5,7 @@ import citiesByState from "../../data/usCitiesByState.json";
 const requiredFields = [
   "title",
   "description",
-  "leadEmails",
+  "leadAssignedTo",
   "employmentType",
   "priority",
   "workSetting",
@@ -66,8 +66,8 @@ export default function RequirementForm({
         title: "",
         description: "",
         client: "",
-        leadEmails: [],
-        recruiterEmails: [],
+        leadAssignedTo: [],
+        recruiterAssignedTo: [],
         locations: [],
         employmentType: "",
         workSetting: "",
@@ -103,6 +103,7 @@ export default function RequirementForm({
       });
     });
   }
+
   const handleWorkAuthCheckbox = (e) => {
     const { value, checked } = e.target;
     setForm((prev) => {
@@ -151,11 +152,33 @@ export default function RequirementForm({
                   type="checkbox"
                   className="form-check-input"
                   id={`lead-${lead.email}`}
-                  checked={form.leadEmails.includes(lead.email)}
-                  onChange={() => handleMultiCheckbox("leadEmails", lead.email)}
+                  checked={form.leadAssignedTo.includes(lead.email)}
+                  onChange={() => handleMultiCheckbox("leadAssignedTo", lead.email)}
                 />
                 <label className="form-check-label" htmlFor={`lead-${lead.email}`}>
                   {lead.username || lead.email}
+                </label>
+              </div>
+            ))
+          )}
+        </div>
+
+        <label className="fw-bold mt-3">Assign to Recruiters:</label>
+        <div className="mb-2 d-flex flex-wrap">
+          {recruiters.length === 0 ? (
+            <p className="text-muted">No recruiters available</p>
+          ) : (
+            recruiters.map((recruiter) => (
+              <div key={recruiter.email} className="form-check me-3 mb-1">
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  id={`recruiter-${recruiter.email}`}
+                  checked={form.recruiterAssignedTo.includes(recruiter.email)}
+                  onChange={() => handleMultiCheckbox("recruiterAssignedTo", recruiter.email)}
+                />
+                <label className="form-check-label" htmlFor={`recruiter-${recruiter.email}`}>
+                  {recruiter.username || recruiter.email}
                 </label>
               </div>
             ))
@@ -224,6 +247,7 @@ export default function RequirementForm({
               <option value="C2C">C2C</option>
             </select>
           </div>
+
           <div className="col-md-6 mb-2">
             <select
               name="duration"
@@ -237,9 +261,6 @@ export default function RequirementForm({
               <option value="shortterm">Short Term</option>
             </select>
           </div>
-
-
-
 
           <div className="col-md-6 mb-2">
             <select
@@ -290,9 +311,7 @@ export default function RequirementForm({
                   </label>
                 </div>
               ))}
-
             </div>
-
           </div>
         </div>
 
@@ -320,6 +339,7 @@ export default function RequirementForm({
           onChange={handleChange}
           required
         />
+
         <input
           type="text"
           name="client"
