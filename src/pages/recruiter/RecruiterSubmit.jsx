@@ -544,6 +544,7 @@ export default function RecruiterSubmit() {
                         <th>Status</th>
                         <th>Active</th>
                         <th>Candidate Update</th>
+                        <th>Lead Status</th> {/* New column */}
                       </tr>
                     </thead>
                     <tbody>
@@ -589,12 +590,17 @@ export default function RecruiterSubmit() {
                               {candidate.candidate_update || "Submitted"}
                             </span>
                           </td>
+                          <td>
+                            <span className={`badge ${getStatusVariant(candidate.lead_update)}`}>
+                              {candidate.lead_update || "Pending"} {/* Lead status */}
+                            </span>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
 
-                  {/* 👇 Pagination Controls */}
+                  {/* Pagination Controls */}
                   <div className="d-flex justify-content-between align-items-center mt-2">
                     <div>
                       Showing {indexOfFirstSubmitted + 1}–{Math.min(indexOfLastSubmitted, submittedCandidates.length)} of {submittedCandidates.length} candidates
