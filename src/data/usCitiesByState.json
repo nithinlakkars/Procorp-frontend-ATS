@@ -1100,5 +1100,115 @@
   ],
   "Vermont": [
     "Burlington"
+  ],
+  "Canada - Ontario": [
+    "Toronto",
+    "Ottawa",
+    "Mississauga",
+    "Brampton",
+    "Hamilton",
+    "London",
+    "Markham",
+    "Vaughan",
+    "Kitchener",
+    "Windsor",
+    "Richmond Hill",
+    "Oakville",
+    "Burlington",
+    "Greater Sudbury",
+    "Oshawa",
+    "Barrie",
+    "St. Catharines",
+    "Guelph",
+    "Cambridge",
+    "Whitby"
+  ],
+  "Canada - Quebec": [
+    "Montreal",
+    "Quebec City",
+    "Laval",
+    "Gatineau",
+    "Longueuil",
+    "Sherbrooke",
+    "Saguenay",
+    "Trois-Rivières",
+    "Terrebonne",
+    "Saint-Jean-sur-Richelieu",
+    "Repentigny",
+    "Brossard"
+  ],
+  "Canada - British Columbia": [
+    "Vancouver",
+    "Surrey",
+    "Burnaby",
+    "Richmond",
+    "Abbotsford",
+    "Coquitlam",
+    "Kelowna",
+    "Langley",
+    "Saanich",
+    "Delta",
+    "Nanaimo",
+    "Kamloops",
+    "Victoria"
+  ],
+  "Canada - Alberta": [
+    "Calgary",
+    "Edmonton",
+    "Red Deer",
+    "Lethbridge",
+    "St. Albert",
+    "Medicine Hat",
+    "Grande Prairie",
+    "Airdrie",
+    "Spruce Grove"
+  ],
+  "Canada - Manitoba": [
+    "Winnipeg",
+    "Brandon",
+    "Steinbach",
+    "Thompson",
+    "Portage la Prairie"
+  ],
+  "Canada - Saskatchewan": [
+    "Saskatoon",
+    "Regina",
+    "Prince Albert",
+    "Moose Jaw",
+    "Swift Current"
+  ],
+  "Canada - Nova Scotia": [
+    "Halifax",
+    "Sydney",
+    "Truro",
+    "New Glasgow"
+  ],
+  "Canada - New Brunswick": [
+    "Moncton",
+    "Saint John",
+    "Fredericton",
+    "Dieppe"
+  ],
+  "Canada - Newfoundland and Labrador": [
+    "St. John's",
+    "Mount Pearl",
+    "Corner Brook",
+    "Conception Bay South",
+    "Gander"
+  ],
+  "Canada - Prince Edward Island": [
+    "Charlottetown",
+    "Summerside"
+  ],
+  "Canada - Northwest Territories": [
+    "Yellowknife",
+    "Hay River",
+    "Inuvik"
+  ],
+  "Canada - Yukon": [
+    "Whitehorse"
+  ],
+  "Canada - Nunavut": [
+    "Iqaluit"
   ]
 }
