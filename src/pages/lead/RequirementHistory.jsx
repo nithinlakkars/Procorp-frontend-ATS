@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { fetchAllRequirements, getAllCandidates } from "../../services";
+import { fetchAllRequirements, fetchLeadRequirements, getAllCandidates } from "../../services";
+
 
 export default function RequirementHistory() {
   const [allReqs, setAllReqs] = useState([]);
