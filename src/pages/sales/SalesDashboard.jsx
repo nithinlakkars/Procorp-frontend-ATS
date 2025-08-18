@@ -13,8 +13,8 @@ export default function SalesDashboard() {
   const [form, setForm] = useState({
     title: "",
     description: "",
-    leadEmails: [],
-    recruiterEmails: [],
+    leadAssignedTo: [],     // 🔄 renamed from leadEmails
+    recruiterAssignedTo: [],
     locations: [],
     employmentType: "",
     workSetting: "",
