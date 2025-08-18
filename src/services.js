@@ -145,9 +145,10 @@ export const fetchLeadRequirements = async () => {
     return response.data;
   } catch (error) {
     console.error("❌ Error fetching lead requirements:", error);
-    return error;
+    return [];
   }
 };
+
 
 // 5️⃣ Fetch candidates submitted by recruiters to Lead
 export const fetchCandidates = async () => {
