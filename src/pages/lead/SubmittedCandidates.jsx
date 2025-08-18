@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Table, Button, Collapse, Badge, Form } from "react-bootstrap";
+import { updateCandidateFields } from "../../services";
+
 
 
 export default function SubmittedCandidates({
@@ -48,7 +50,7 @@ export default function SubmittedCandidates({
   const handleStatusChange = async (candidateId, newStatus) => {
     try {
       // Call your API to update candidate status in backend
-      await updateCandidateStatus(candidateId, newStatus);
+      await updateCandidateFields(candidateId, { candidate_update: newStatus });
 
       // Reload candidates after update
       await loadCandidates();
@@ -189,6 +191,7 @@ export default function SubmittedCandidates({
                       <option value="submitted-to-client">Submitted to Client</option>
                       <option value="submitted">Submitted</option>
                     </Form.Select>
+
                   </td>
 
 
