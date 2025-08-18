@@ -385,6 +385,7 @@ export default function RecruiterSubmit() {
                           <tr>
                             <th>Requirement ID</th>
                             <th>Title</th>
+                            <th>Client</th>
                             <th>Location</th>
                             <th>Rate</th>
                             <th>Duration</th> {/* ✅ New column */}
@@ -413,6 +414,7 @@ export default function RecruiterSubmit() {
                                 <tr>
                                   <td>{req.requirementId}</td>
                                   <td>{req.title}</td>
+                                  <td>{req.client || "N/A"}</td>
                                   <td>{req.locations?.join(", ")}</td>
                                   <td>{req.rate || "N/A"}</td>
                                   <td>{req.duration || "N/A"}</td> {/* ✅ Duration value */}
