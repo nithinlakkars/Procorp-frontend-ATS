@@ -43,13 +43,13 @@ export default function SubmittedCandidates({
   };
 
   // Update handleStatusChange to use lead_update
-  const handleStatusChange = async (candidateId, newStatus) => {
+  const handleLeadStatusChange = async (candidateId, newStatus) => {
     try {
       await updateCandidateLeadStatus(candidateId, newStatus);
-      await loadCandidates();
+      await loadCandidates(); // refresh table
     } catch (err) {
-      console.error("❌ Failed to update candidate status:", err);
-      setMessage("❌ Failed to update status");
+      console.error("❌ Failed to update lead status:", err);
+      setMessage("❌ Failed to update lead status");
     }
   };
 
@@ -171,7 +171,7 @@ export default function SubmittedCandidates({
                     <Form.Select
                       size="sm"
                       value={candidate.lead_update || ""}
-                      onChange={(e) => handleStatusChange(candidate._id, e.target.value)}
+                      onChange={(e) => handleLeadStatusChange(candidate._id, e.target.value)}
                     >
                       <option value="">Select</option>
                       <option value="L1-cleared">L1 Cleared</option>
@@ -184,6 +184,7 @@ export default function SubmittedCandidates({
                       <option value="submitted-to-client">Submitted to Client</option>
                       <option value="submitted">Submitted</option>
                     </Form.Select>
+
                   </td>
 
                   <td>
