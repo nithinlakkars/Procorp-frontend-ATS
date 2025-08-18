@@ -25,17 +25,19 @@ export default function RequirementHistory() {
         getAllCandidates(),
       ]);
 
-      // Normalize Sales & Lead requirements
+  
+      // Normalize Sales requirements (API returns full response)
       const salesRequirements = Array.isArray(salesRes?.data)
         ? salesRes.data
         : Array.isArray(salesRes)
           ? salesRes
           : [];
 
-      const leadRequirements = Array.isArray(leadRes?.data)
-        ? leadRes.data
-        : Array.isArray(leadRes)
-          ? leadRes
+      // Normalize Lead requirements (API already returns .data directly)
+      const leadRequirements = Array.isArray(leadRes)
+        ? leadRes
+        : Array.isArray(leadRes?.data)
+          ? leadRes.data
           : [];
 
       // Merge both into one array
