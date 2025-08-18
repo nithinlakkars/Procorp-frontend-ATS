@@ -56,7 +56,9 @@ function RequirementCard({
         >
           {req.title}
         </h5>
-
+        <p>
+          <strong>Client:</strong> {req.client || "N/A"}
+        </p>
         <p>
           <strong>Location:</strong> {req.locations?.join(", ") || "N/A"}
         </p>
