@@ -45,58 +45,59 @@ export default function RequirementForm({
     loadData();
   }, []);
 
-const handleSubmitRequirement = async (e) => {
-  e.preventDefault();
-  setSuccessMsg("");
-  setErrorMsg("");
+  const handleSubmitRequirement = async (e) => {
+    e.preventDefault();
+    setSuccessMsg("");
+    setErrorMsg("");
 
-  for (let field of requiredFields) {
-    if (!form[field] || (Array.isArray(form[field]) && form[field].length === 0)) {
-      setErrorMsg("❌ Please fill all required fields");
-      return;
+    for (let field of requiredFields) {
+      if (!form[field] || (Array.isArray(form[field]) && form[field].length === 0)) {
+        setErrorMsg("❌ Please fill all required fields");
+        return;
+      }
     }
-  }
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    // 🔑 Transform frontend fields into what backend expects
-    const payload = {
-      ...form,
-      leadEmails: form.leadAssignedTo || [],
-      recruiterEmails: form.recruiterAssignedTo || [],
-    };
+      // 🔑 Transform frontend fields into what backend expects
+      const payload = {
+        ...form,
+        leadEmails: Array.isArray(form.leadAssignedTo) ? form.leadAssignedTo : [],
+        recruiterAssignedTo: Array.isArray(form.recruiterAssignedTo) ? form.recruiterAssignedTo : [],
+      };
 
-    await submitSalesRequirement(payload);
 
-    setSuccessMsg("✅ Requirement submitted successfully!");
-    setForm({
-      title: "",
-      description: "",
-      client: "",
-      leadAssignedTo: [],
-      recruiterAssignedTo: [],
-      locations: [],
-      employmentType: "",
-      workSetting: "",
-      workAuthorization: [],
-      rate: "",
-      primarySkills: "",
-      priority: "",
-      duration: "",
-    });
-    setLocationSearch("");
-  } catch (err) {
-    console.error("❌ Error submitting requirement:", err);
-    setErrorMsg("❌ Failed to submit requirement");
-  } finally {
-    setLoading(false);
-    setTimeout(() => {
-      setSuccessMsg("");
-      setErrorMsg("");
-    }, 3000);
-  }
-};
+      await submitSalesRequirement(payload);
+
+      setSuccessMsg("✅ Requirement submitted successfully!");
+      setForm({
+        title: "",
+        description: "",
+        client: "",
+        leadAssignedTo: [],
+        recruiterAssignedTo: [],
+        locations: [],
+        employmentType: "",
+        workSetting: "",
+        workAuthorization: [],
+        rate: "",
+        primarySkills: "",
+        priority: "",
+        duration: "",
+      });
+      setLocationSearch("");
+    } catch (err) {
+      console.error("❌ Error submitting requirement:", err);
+      setErrorMsg("❌ Failed to submit requirement");
+    } finally {
+      setLoading(false);
+      setTimeout(() => {
+        setSuccessMsg("");
+        setErrorMsg("");
+      }, 3000);
+    }
+  };
 
 
   const searchResults = [];
