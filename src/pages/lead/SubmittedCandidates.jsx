@@ -103,7 +103,8 @@ export default function SubmittedCandidates({
             <th>Resume</th>
             <th>Active</th>
             <th>Sales Status</th>
-            <th>Candidate Update</th>
+            <th>Sales Update</th>
+            <th>Update Status</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -155,6 +156,25 @@ export default function SubmittedCandidates({
                     <Badge bg={getStatusVariant(candidate.candidate_update)}>
                       {candidate.candidate_update || "N/A"}
                     </Badge>
+                  </td>
+                  {/* Update Status Dropdown */}
+                  <td>
+                    <Form.Select
+                      size="sm"
+                      value={candidate.candidate_update || ""}
+                      onChange={(e) => handleStatusChange(candidate._id, e.target.value)}
+                    >
+                      <option value="">Select</option>
+                      <option value="L1-cleared">L1 Cleared</option>
+                      <option value="selected">Selected</option>
+                      <option value="rejected">Rejected</option>
+                      <option value="Waiting-for-update">Waiting for update</option>
+                      <option value="To-be-interviewed">To be interviewed</option>
+                      <option value="Decision-pending">Decision pending</option>
+                      <option value="internal-rejection">Internal Rejection</option>
+                      <option value="submitted-to-client">Submitted to Client</option>
+                      <option value="submitted">Submitted</option>
+                    </Form.Select>
                   </td>
 
                   <td>
