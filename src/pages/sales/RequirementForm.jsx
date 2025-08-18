@@ -5,7 +5,6 @@ import citiesByState from "../../data/usCitiesByState.json";
 const requiredFields = [
   "title",
   "description",
-  "leadAssignedTo",
   "employmentType",
   "priority",
   "workSetting",
