@@ -153,8 +153,8 @@ export default function ForwardedCandidates({ onCountUpdate }) {
                 <th key={i}>{fieldLabels[field] || field}</th>
               ))}
               <th>Active</th>
-              <th>Resume</th>
-              <th>Status</th>
+              <th>Documents</th>
+              <th>Status Update</th>
             </tr>
           </thead>
 
