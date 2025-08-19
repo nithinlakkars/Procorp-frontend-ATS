@@ -306,7 +306,7 @@ export default function RequirementForm({
           <div className="col-md-6 mb-2">
             <div className="mb-3">
               <label className="form-label fw-bold">Work Authorization</label>
-              {["USC", "GC", "H1B", "OPT", "Other"].map((option) => (
+              {["USC", "GC","GC-EAD", "H1B","H4-EAD","TN","L2-EAD","OPT", "Other"].map((option) => (
                 <div className="form-check" key={option}>
                   <input
                     className="form-check-input"
