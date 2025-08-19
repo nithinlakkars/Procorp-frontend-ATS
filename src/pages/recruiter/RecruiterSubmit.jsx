@@ -543,7 +543,7 @@ export default function RecruiterSubmit() {
                         <th>Resume</th>
                         <th>Status</th>
                         <th>Active</th>
-                        <th>Candidate Update</th>
+                        <th>Sales Update</th>
                         <th>Lead Status</th> {/* New column */}
                       </tr>
                     </thead>
