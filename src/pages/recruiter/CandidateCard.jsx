@@ -4,18 +4,35 @@ import { updateCandidateStatus } from "../../services"; // make sure it's define
 // ✅ Extracted helper function
 const getStatusVariant = (status) => {
   switch (status) {
+    // 🔹 Sales-specific statuses
     case "forwarded-to-sales":
       return "primary";
-    case "selected":
-      return "success";
-    case "rejected":
-      return "danger";
     case "on-hold":
       return "warning text-dark";
+
+    // 🔹 Enum statuses
+    case "L1-cleared":
+      return "info"; // light blue
+    case "selected":
+      return "success"; // green
+    case "rejected":
+    case "internal-rejection":
+      return "danger"; // red
+    case "Waiting-for-update":
+    case "Decision-pending":
+      return "warning"; // yellow
+    case "To-be-interviewed":
+      return "primary"; // blue
+    case "submitted":
+    case "submitted-to-client":
+      return "secondary"; // gray
+
+    // 🔹 Fallback
     default:
-      return "secondary";
+      return "dark"; // default Bootstrap badge
   }
 };
+
 
 export default function CandidateCardList({ candidates = [], loadCandidates }) {
   const itemsPerPage = 5;
