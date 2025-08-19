@@ -72,7 +72,7 @@ export default function ForwardedCandidates({ onCountUpdate }) {
     "candidateId",
     "name",
     "role",
-    "client",
+    // "client",
     "forwardedBy",
     "addedBy",
     "requirementId",
