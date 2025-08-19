@@ -268,7 +268,7 @@ export default function RequirementForm({
 
         <label className="fw-bold mt-3">Work Authorization:</label>
         <div className="mb-2 d-flex flex-wrap">
-          {["USC", "GC", "H1B", "OPT", "Other"].map((auth) => (
+          {["USC", "GC","GC-EAD", "H1B","H4-EAD","TN","L2-EAD","OPT", "Other"].map((auth) => (
             <div key={auth} className="form-check me-3 mb-1">
               <input
                 type="checkbox"
