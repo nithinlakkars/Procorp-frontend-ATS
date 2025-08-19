@@ -161,10 +161,11 @@ export default function SubmittedCandidates({
 
                   {/* Sales Update */}
                   <td>
-                    <Badge bg={getStatusVariant(candidate.sales_update)}>
+                    <span className={`badge ${getStatusVariant(candidate.sales_update)}`}>
                       {candidate.sales_update || "N/A"}
-                    </Badge>
+                    </span>
                   </td>
+
 
                   {/* Lead Update */}
                   <td>
