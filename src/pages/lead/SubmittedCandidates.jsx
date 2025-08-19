@@ -87,18 +87,28 @@ export default function SubmittedCandidates({
     }
   };
 
-  const getStatusVariant = (status) => {
-    switch (status) {
-      case "forwarded-to-sales":
-        return "primary";
-      case "selected":
-        return "success";
-      case "rejected":
-        return "danger";
-      default:
-        return "secondary";
-    }
-  };
+const getStatusVariant = (status) => {
+  switch (status) {
+    case "L1-cleared":
+      return "info"; // light blue
+    case "selected":
+      return "success"; // green
+    case "rejected":
+    case "internal-rejection":
+      return "danger"; // red
+    case "Waiting-for-update":
+    case "Decision-pending":
+      return "warning"; // yellow
+    case "To-be-interviewed":
+      return "primary"; // blue
+    case "submitted":
+    case "submitted-to-client":
+      return "secondary"; // gray
+    default:
+      return "dark"; // fallback
+  }
+};
+
 
   return (
     <section className="container mt-4">
