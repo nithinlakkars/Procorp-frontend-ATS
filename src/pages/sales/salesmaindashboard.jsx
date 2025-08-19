@@ -17,11 +17,15 @@ const AccountManagerDashboard = () => {
       try {
         const token = sessionStorage.getItem("token");
 
-        const { data } = await axios.get(API_URL, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const { data } = await axios.get(
+          `${API_URL}/api/stats/sales-dashboard`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
 
         console.log("Dashboard stats:", data);
         setStats(data);
