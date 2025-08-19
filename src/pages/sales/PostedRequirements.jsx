@@ -11,6 +11,7 @@ export default function PostedRequirements({ onCountUpdate }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedReq, setSelectedReq] = useState(null);
+  const [allCandidates, setAllCandidates] = useState([]);
   const [loading, setLoading] = useState(false);
   const reqsPerPage = 5;
 
@@ -21,8 +22,6 @@ export default function PostedRequirements({ onCountUpdate }) {
 
   const loadRequirements = async () => {
     try {
-      console.log("🟡 loadRequirements called");
-
       setLoading(true);
 
       const [requirementsRes, candidatesRes] = await Promise.all([
@@ -30,23 +29,17 @@ export default function PostedRequirements({ onCountUpdate }) {
         getAllCandidates(),
       ]);
 
-      console.log("✅ fetchSalesRequirements response:", requirementsRes);
-      console.log("✅ getAllCandidates response:", candidatesRes);
-
-      // ✅ Adjust based on whether requirementsRes is already an array
       const requirementData = Array.isArray(requirementsRes)
         ? requirementsRes
         : requirementsRes?.data || [];
 
-      // ✅ Extract candidates
       const candidates = Array.isArray(candidatesRes?.candidates)
         ? candidatesRes.candidates
         : candidatesRes?.data?.candidates || [];
 
-      console.log("🧾 Cleaned requirement data:", requirementData);
-      console.log("🧾 Cleaned candidates data:", candidates);
+      setAllCandidates(candidates); // ✅ store all candidates
 
-      // 🔁 Build submission count map
+      // Build submission map
       const submissionMap = {};
       candidates.forEach((candidate) => {
         const reqIds = Array.isArray(candidate.requirementId)
@@ -55,27 +48,32 @@ export default function PostedRequirements({ onCountUpdate }) {
 
         reqIds.forEach((reqId) => {
           const trimmed = reqId?.trim?.();
-          if (trimmed) {
-            submissionMap[trimmed] = (submissionMap[trimmed] || 0) + 1;
-          }
+          if (trimmed) submissionMap[trimmed] = (submissionMap[trimmed] || 0) + 1;
         });
       });
 
-      // 🏗️ Enrich requirements with submission count
       const enrichedRequirements = requirementData.map((req) => {
         const count = submissionMap[req.requirementId?.trim()] || 0;
-        return { ...req, submissionCount: count };
+
+        // ✅ attach relevant candidates
+        const reqCandidates = candidates.filter(c =>
+          (Array.isArray(c.requirementId) ? c.requirementId : [c.requirementId])
+            .map(id => id.trim())
+            .includes(req.requirementId?.trim())
+        );
+
+        return { ...req, submissionCount: count, candidates: reqCandidates };
       });
 
       setSubmittedReqs(enrichedRequirements);
       onCountUpdate?.(enrichedRequirements.length);
+
     } catch (error) {
       console.error("❌ Failed to load requirements or candidates:", error);
     } finally {
       setLoading(false);
     }
   };
-
 
 
   const handleStatusChange = async (requirementId, newStatus) => {
