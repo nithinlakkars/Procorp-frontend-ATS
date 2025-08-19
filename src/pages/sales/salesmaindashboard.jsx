@@ -20,11 +20,10 @@ const AccountManagerDashboard = () => {
         const { data } = await axios.get(
           `${API_URL}/api/stats/sales-dashboard`,
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
+
 
 
         console.log("Dashboard stats:", data);
