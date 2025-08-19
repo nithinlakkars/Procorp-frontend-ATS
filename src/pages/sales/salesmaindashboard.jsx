@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Card, Spinner } from "react-bootstrap";
 import axios from "axios";
-const API_URL = "https://procorp-ats-backend.onrender.com/api/stats/sales-dashboard";
-const SALES_CANDIDATES_URL = "https://procorp-ats-backend.onrender.com/api/candidates/sales";
+const API_URL = process.env.REACT_APP_API_URL;
+;
+// const SALES_CANDIDATES_URL = "https://procorp-ats-backend.onrender.com/api/candidates/sales";
 
 const AccountManagerDashboard = () => {
   const [stats, setStats] = useState(null);
@@ -15,14 +16,13 @@ const AccountManagerDashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
+        console.log("API_URL from env:", API_URL);
         const token = sessionStorage.getItem("token");
 
-        const { data } = await axios.get(
-          `${API_URL}/api/stats/sales-dashboard`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        const { data } = await axios.get(`${API_URL}/api/stats/sales-dashboard`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
 
 
 
