@@ -222,6 +222,7 @@ export default function ForwardedCandidates({ onCountUpdate }) {
                         <option value="Decision-pending">Decision pending</option>
                         <option value="internal-rejection">Internal Rejection</option>
                         <option value="submitted-to-client">Submitted to Client</option>
+                        <option value="submitted">Submitted</option>
 
                       </Form.Select>
                     </td>
