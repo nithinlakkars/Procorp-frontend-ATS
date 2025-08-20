@@ -130,38 +130,30 @@ export const bulkAssignRequirements = async (payload) => {
 };
 
 // 4️⃣ Fetch all requirements assigned to this lead (history)
-export const fetchAllRequirements = async () => {
-  return await axios.get(`${API_URL}/api/requirements/leads/my`, {
-    headers: {
-      Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-    },
-  });
-};
-// Assigned to lead
-export const fetchLeadRequirementsAssigned = async () => {
+
+// Assigned to this lead
+
+
+// Created by this lead
+
+
+// Merge both assigned + created
+// Fetch ALL requirements for a lead (already implemented in backend)
+export const fetchAllLeadRequirements = async () => {
   try {
-    const response = await axios.get(`${API_URL}/api/leads/my`, {
-      headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
+    const token = sessionStorage.getItem("token");
+    const res = await axios.get(`${API_URL}/api/requirements/leads/all`, {
+      headers: { Authorization: `Bearer ${token}` },
     });
-    return response.data;
+    return res.data;
   } catch (error) {
-    console.error("❌ Error fetching assigned lead requirements:", error);
+    console.error("❌ Error fetching all lead requirements:", error);
     return [];
   }
 };
 
-// Created by lead
-export const fetchLeadRequirementsCreated = async () => {
-  try {
-    const response = await axios.get(`${API_URL}/api/leads/created`, {
-      headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("❌ Error fetching created lead requirements:", error);
-    return [];
-  }
-};
+
+
 
 
 
@@ -384,18 +376,6 @@ export const updateCandidateLeadStatus = async (candidateId, leadStatus) => {
   }
 };
 // Fetch all requirements for lead (both created & assigned)
-export const fetchAllLeadRequirements = async () => {
-  try {
-    const token = sessionStorage.getItem("token");
-    const res = await axios.get(`${API_URL}/api/leads/all`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return res.data; // array of requirements with type
-  } catch (err) {
-    console.error("❌ Error fetching all lead requirements:", err.response?.data || err.message);
-    return [];
-  }
-};
 
 
 
