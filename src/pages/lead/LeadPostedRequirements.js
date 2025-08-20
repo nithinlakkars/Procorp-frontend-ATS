@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { fetchLeadRequirements, getAllCandidates, updateRequirementStatus } from "../../services";
+import { fetchAllLeadRequirements, getAllCandidates, updateRequirementStatus } from "../../services";
 import { Modal, Button } from "react-bootstrap";
 
 export default function LeadPostedRequirements({ onCountUpdate }) {
@@ -8,44 +8,39 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedReq, setSelectedReq] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [type, setType] = useState("assigned"); // "assigned" or "created"
   const reqsPerPage = 5;
 
   useEffect(() => {
     loadRequirements();
-  }, []);
+  }, [type]);
 
   const loadRequirements = async () => {
     try {
       setLoading(true);
-      const leadEmail = sessionStorage.getItem("user");
 
-      // API to get lead requirements
-      const [reqRes, candidatesRes] = await Promise.all([
-        fetchLeadRequirements(leadEmail),
-        getAllCandidates()
-      ]);
-
-      const requirementData = Array.isArray(reqRes)
-        ? reqRes
-        : reqRes?.data || [];
+      // Fetch all lead requirements (both assigned & created)
+      const allRequirements = await fetchAllLeadRequirements();
+      const candidatesRes = await getAllCandidates();
 
       const candidates = Array.isArray(candidatesRes?.candidates)
         ? candidatesRes.candidates
         : candidatesRes?.data?.candidates || [];
 
-      // map submissions
+      // Filter by selected type
+      const filteredReqs = allRequirements.filter(req => req.type === type);
+
+      // Map candidate submissions
       const submissionMap = {};
-      candidates.forEach((candidate) => {
-        const ids = Array.isArray(candidate.requirementId)
-          ? candidate.requirementId
-          : [candidate.requirementId];
-        ids.forEach((id) => {
+      candidates.forEach(candidate => {
+        const ids = Array.isArray(candidate.requirementId) ? candidate.requirementId : [candidate.requirementId];
+        ids.forEach(id => {
           const trimmed = id?.trim?.();
           if (trimmed) submissionMap[trimmed] = (submissionMap[trimmed] || 0) + 1;
         });
       });
 
-      const enriched = requirementData.map((req) => {
+      const enriched = filteredReqs.map(req => {
         const count = submissionMap[req.requirementId?.trim()] || 0;
         const reqCandidates = candidates.filter(c =>
           (Array.isArray(c.requirementId) ? c.requirementId : [c.requirementId])
@@ -59,6 +54,8 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
       onCountUpdate?.(enriched.length);
     } catch (err) {
       console.error("❌ Failed to load lead requirements:", err);
+      setRequirements([]);
+      onCountUpdate?.(0);
     } finally {
       setLoading(false);
     }
@@ -73,7 +70,7 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
     }
   };
 
-  const filtered = requirements.filter((req) => {
+  const filtered = requirements.filter(req => {
     const q = searchQuery.toLowerCase();
     return (
       req.requirementId?.toLowerCase().includes(q) ||
@@ -84,19 +81,33 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
   });
 
   const totalPages = Math.ceil(filtered.length / reqsPerPage);
-  const currentReqs = filtered.slice(
-    (currentPage - 1) * reqsPerPage,
-    currentPage * reqsPerPage
-  );
+  const currentReqs = filtered.slice((currentPage - 1) * reqsPerPage, currentPage * reqsPerPage);
 
   return (
     <section className="mt-4">
+      <div className="mb-3">
+        <Button
+          size="sm"
+          className={`me-2 ${type === "assigned" ? "btn-primary" : "btn-outline-primary"}`}
+          onClick={() => setType("assigned")}
+        >
+          Assigned Requirements
+        </Button>
+        <Button
+          size="sm"
+          className={type === "created" ? "btn-primary" : "btn-outline-primary"}
+          onClick={() => setType("created")}
+        >
+          Created Requirements
+        </Button>
+      </div>
+
       <input
         type="text"
         className="form-control mb-3"
         placeholder="🔍 Search requirements..."
         value={searchQuery}
-        onChange={(e) => {
+        onChange={e => {
           setSearchQuery(e.target.value);
           setCurrentPage(1);
         }}
@@ -124,7 +135,7 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
                 </td>
               </tr>
             ) : (
-              currentReqs.map((req) => (
+              currentReqs.map(req => (
                 <tr key={req._id}>
                   <td>{req.requirementId}</td>
                   <td>
@@ -145,7 +156,7 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
                     <select
                       className="form-select form-select-sm"
                       value={req.requirementStatus || "open"}
-                      onChange={(e) => handleStatusChange(req._id, e.target.value)}
+                      onChange={e => handleStatusChange(req._id, e.target.value)}
                     >
                       <option value="open">Open</option>
                       <option value="closed">Closed</option>
@@ -167,7 +178,9 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
         >
           ⬅ Prev
         </button>
-        <span>Page {currentPage} of {totalPages}</span>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
         <button
           className="btn btn-outline-secondary btn-sm"
           disabled={currentPage === totalPages}
@@ -183,11 +196,21 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
           <Modal.Title>Requirement Details</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p><strong>Title:</strong> {selectedReq?.title}</p>
-          <p><strong>Description:</strong> {selectedReq?.description}</p>
-          <p><strong>Work Setting:</strong> {selectedReq?.workSetting}</p>
-          <p><strong>Rate:</strong> {selectedReq?.rate}</p>
-          <p><strong>Primary Skills:</strong> {selectedReq?.primarySkills}</p>
+          <p>
+            <strong>Title:</strong> {selectedReq?.title}
+          </p>
+          <p>
+            <strong>Description:</strong> {selectedReq?.description}
+          </p>
+          <p>
+            <strong>Work Setting:</strong> {selectedReq?.workSetting}
+          </p>
+          <p>
+            <strong>Rate:</strong> {selectedReq?.rate}
+          </p>
+          <p>
+            <strong>Primary Skills:</strong> {selectedReq?.primarySkills}
+          </p>
         </Modal.Body>
       </Modal>
     </section>

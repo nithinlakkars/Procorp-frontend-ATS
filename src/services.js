@@ -137,17 +137,32 @@ export const fetchAllRequirements = async () => {
     },
   });
 };
-export const fetchLeadRequirements = async () => {
+// Assigned to lead
+export const fetchLeadRequirementsAssigned = async () => {
   try {
-    const response = await axios.get(`${API_URL}/api/requirements/leads/my`, {
+    const response = await axios.get(`${API_URL}/api/leads/my`, {
       headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
     });
     return response.data;
   } catch (error) {
-    console.error("❌ Error fetching lead requirements:", error);
+    console.error("❌ Error fetching assigned lead requirements:", error);
     return [];
   }
 };
+
+// Created by lead
+export const fetchLeadRequirementsCreated = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/api/leads/created`, {
+      headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("❌ Error fetching created lead requirements:", error);
+    return [];
+  }
+};
+
 
 
 // 5️⃣ Fetch candidates submitted by recruiters to Lead
@@ -368,6 +383,20 @@ export const updateCandidateLeadStatus = async (candidateId, leadStatus) => {
     throw error;
   }
 };
+// Fetch all requirements for lead (both created & assigned)
+export const fetchAllLeadRequirements = async () => {
+  try {
+    const token = sessionStorage.getItem("token");
+    const res = await axios.get(`${API_URL}/api/leads/all`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.data; // array of requirements with type
+  } catch (err) {
+    console.error("❌ Error fetching all lead requirements:", err.response?.data || err.message);
+    return [];
+  }
+};
+
 
 
 

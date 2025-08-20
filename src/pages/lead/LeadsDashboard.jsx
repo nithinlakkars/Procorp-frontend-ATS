@@ -25,7 +25,7 @@ export default function LeadsDashboard() {
   const [leadEmail, setLeadEmail] = useState("");
   const [forwardedCount, setForwardedCount] = useState(0);
   const [selectedView, setSelectedView] = useState("accountManager");
-
+  const [postedReqCount, setPostedReqCount] = useState(0);
 
   const [form, setForm] = useState({
     title: "",
@@ -43,8 +43,8 @@ export default function LeadsDashboard() {
   const [locationSearch, setLocationSearch] = useState("");
 
   const rateRanges = [
-    "$40-45/hr", "$45-50/hr", "$50-55/hr", "$55-60/hr", "$60-65/hr", "$65-70/hr", "$70-75/hr",
-    "$75-80/hr", "$80-85/hr", "$85-90/hr", "$90-95/hr",
+    "$40-45/hr", "$45-50/hr", "$50-55/hr", "$55-60/hr", "$60-65/hr",
+    "$65-70/hr", "$70-75/hr", "$75-80/hr", "$80-85/hr", "$85-90/hr", "$90-95/hr",
   ];
 
   const handleChange = (e) => {
@@ -62,7 +62,6 @@ export default function LeadsDashboard() {
       }
     });
   };
-
 
   useEffect(() => {
     const user = sessionStorage.getItem("user");
@@ -130,8 +129,7 @@ export default function LeadsDashboard() {
         <h4 className="fw-bold text-primary mb-4 text-center">ProCorp ATS</h4>
 
         <div
-          className={`d-flex align-items-center mb-3 p-2 rounded ${selectedView === "dashboard" ? "bg-primary text-white" : ""
-            }`}
+          className={`d-flex align-items-center mb-3 p-2 rounded ${selectedView === "dashboard" ? "bg-primary text-white" : ""}`}
           onClick={() => setSelectedView("dashboard")}
           style={{ cursor: "pointer" }}
         >
@@ -140,26 +138,12 @@ export default function LeadsDashboard() {
         </div>
 
         <div
-          className={`d-flex align-items-center mb-3 p-2 rounded ${selectedView === "accountManager" ? "bg-primary text-white" : ""
-            }`}
+          className={`d-flex align-items-center mb-3 p-2 rounded ${selectedView === "accountManager" ? "bg-primary text-white" : ""}`}
           onClick={() => setSelectedView("accountManager")}
           style={{ cursor: "pointer" }}
         >
           <FaUserTie className="me-2" />
           TA Lead
-        </div>
-
-        <div className="mt-auto pt-5 text-center">
-          {/* <div
-            className="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center"
-            style={{ width: 40, height: 40 }}
-          >
-            TA
-          </div>
-          <div className="small mt-1">TA Recruiter</div>
-          <div className="text-muted" style={{ fontSize: "12px" }}>
-            TA Recruiter
-          </div> */}
         </div>
       </div>
 
@@ -170,7 +154,6 @@ export default function LeadsDashboard() {
         ) : (
           <div className="container-fluid">
             <Navbar />
-
             <main className="col-12 px-md-4 py-4">
               <div className="p-4">
                 <h2 className="fw-bold">Talent Acquisition Lead</h2>
@@ -178,7 +161,7 @@ export default function LeadsDashboard() {
               </div>
 
               <div className="row mb-4 text-center justify-content-center">
-                <div className="col-md-4">
+                <div className="col-md-3">
                   <div className="card border-0 shadow-sm">
                     <div className="card-body">
                       <div className="text-muted mb-1">New Requirements</div>
@@ -186,7 +169,15 @@ export default function LeadsDashboard() {
                     </div>
                   </div>
                 </div>
-                <div className="col-md-4">
+                <div className="col-md-3">
+                  <div className="card border-0 shadow-sm">
+                    <div className="card-body">
+                      <div className="text-muted mb-1">Posted Requirements</div>
+                      <div className="h3 fw-bold">{postedReqCount}</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-md-3">
                   <div className="card border-0 shadow-sm">
                     <div className="card-body">
                       <div className="text-muted mb-1">Submitted Candidates</div>
@@ -194,7 +185,7 @@ export default function LeadsDashboard() {
                     </div>
                   </div>
                 </div>
-                <div className="col-md-4">
+                <div className="col-md-3">
                   <div className="card border-0 shadow-sm">
                     <div className="card-body">
                       <div className="text-muted mb-1">Forwarded to Sales</div>
@@ -229,7 +220,6 @@ export default function LeadsDashboard() {
                     Posted Requirements
                   </button>
                 </li>
-
                 <li className="nav-item">
                   <button
                     className={`nav-link ${activeSection === "submittedCandidates" ? "active" : ""}`}
@@ -249,10 +239,7 @@ export default function LeadsDashboard() {
               </ul>
 
               {message && (
-                <div
-                  className={`alert ${message.startsWith("❌") ? "alert-danger" : "alert-success"
-                    } text-center`}
-                >
+                <div className={`alert ${message.startsWith("❌") ? "alert-danger" : "alert-success"} text-center`}>
                   {message}
                 </div>
               )}
@@ -270,9 +257,14 @@ export default function LeadsDashboard() {
                   rateRanges={rateRanges}
                 />
               )}
+
               {activeSection === "leadPostedRequirements" && (
-                <LeadPostedRequirements onCountUpdate={(count) => console.log("Lead req count:", count)} />
+                <LeadPostedRequirements
+                  leadEmail={leadEmail}
+                  onCountUpdate={setPostedReqCount}
+                />
               )}
+
               {activeSection === "newRequirements" && (
                 <NewRequirementsSection
                   requirements={requirements}
