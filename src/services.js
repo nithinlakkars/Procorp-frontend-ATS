@@ -143,16 +143,24 @@ export const bulkAssignRequirements = async (payload) => {
 export const fetchAllLeadRequirements = async () => {
   try {
     const token = sessionStorage.getItem("token");
+    if (!token) throw new Error("No token found in session storage");
+
     const res = await axios.get(`${API_URL}/api/requirements/leads/all`, {
-      headers: { Authorization: `Bearer ${token}` },
-      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
+
     return res.data;
   } catch (error) {
-    console.error("❌ Error fetching all lead requirements:", error.response?.data || error.message);
+    console.error(
+      "❌ Error fetching all lead requirements:",
+      error.response?.data || error.message
+    );
     return [];
   }
 };
+
 
 
 
