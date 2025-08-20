@@ -383,7 +383,9 @@ export const updateCandidateLeadStatus = async (candidateId, leadStatus) => {
 };
 // Fetch all requirements for lead (both created & assigned)
 
-
+export const fetchAllRequirements = async () => {
+  return axios.get(`${API_URL}/api/requirements/leads/view-all`);
+};
 
 
 
