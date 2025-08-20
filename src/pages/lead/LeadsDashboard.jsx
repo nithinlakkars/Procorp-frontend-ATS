@@ -12,7 +12,7 @@ import {
   fetchUnassignedRequirements,
   fetchRecruiters,
   forwardCandidateToSales,
-  fetchRequirementsByLead, // ✅ NEW for Posted Requirements
+  fetchAllRequirements, // 
 } from "../../services";
 import Navbar from "../../componenets/Navbar";
 
@@ -73,7 +73,7 @@ export default function LeadsDashboard() {
         fetchCandidates(),
         fetchUnassignedRequirements(),
         fetchRecruiters(),
-        fetchRequirementsByLead(userEmail), // ✅ get requirements created by this lead
+        fetchAllRequirements(),// ✅ get requirements created by this lead
       ]);
 
       // Normalize
@@ -82,9 +82,11 @@ export default function LeadsDashboard() {
         : unassignedReqsRes?.data || [];
 
       const candidatesList = candidatesRes?.candidates || [];
-      const postedData = Array.isArray(postedRes)
-        ? postedRes
-        : postedRes?.data || [];
+      const postedData = Array.isArray(postedRes?.data)
+        ? postedRes.data
+        : Array.isArray(postedRes)
+          ? postedRes
+          : [];
 
       setCandidates(candidatesList);
       setRequirements(unassignedData);
