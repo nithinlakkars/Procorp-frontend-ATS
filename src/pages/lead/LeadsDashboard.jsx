@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FaTachometerAlt, FaUserTie } from "react-icons/fa";
+import LeadPostedRequirements from "./LeadPostedRequirements";
 
 import NewRequirementsSection from "./NewRequirementsSection";
 import SubmittedCandidates from "./SubmittedCandidates";
@@ -24,6 +25,7 @@ export default function LeadsDashboard() {
   const [leadEmail, setLeadEmail] = useState("");
   const [forwardedCount, setForwardedCount] = useState(0);
   const [selectedView, setSelectedView] = useState("accountManager");
+
 
   const [form, setForm] = useState({
     title: "",
@@ -221,6 +223,15 @@ export default function LeadsDashboard() {
                 </li>
                 <li className="nav-item">
                   <button
+                    className={`nav-link ${activeSection === "leadPostedRequirements" ? "active" : ""}`}
+                    onClick={() => setActiveSection("leadPostedRequirements")}
+                  >
+                    Posted Requirements
+                  </button>
+                </li>
+
+                <li className="nav-item">
+                  <button
                     className={`nav-link ${activeSection === "submittedCandidates" ? "active" : ""}`}
                     onClick={() => setActiveSection("submittedCandidates")}
                   >
@@ -259,7 +270,9 @@ export default function LeadsDashboard() {
                   rateRanges={rateRanges}
                 />
               )}
-
+              {activeSection === "leadPostedRequirements" && (
+                <LeadPostedRequirements onCountUpdate={(count) => console.log("Lead req count:", count)} />
+              )}
               {activeSection === "newRequirements" && (
                 <NewRequirementsSection
                   requirements={requirements}
