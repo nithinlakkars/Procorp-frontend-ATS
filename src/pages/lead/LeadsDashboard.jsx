@@ -12,7 +12,7 @@ import {
   fetchUnassignedRequirements,
   fetchRecruiters,
   forwardCandidateToSales,
-   viewAllRequirements as fetchAllRequirements, // 
+  fetchAllRequirements, // 
 } from "../../services";
 import Navbar from "../../componenets/Navbar";
 
