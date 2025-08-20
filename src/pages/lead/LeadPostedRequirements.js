@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { fetchAllLeadRequirements, getAllCandidates, updateRequirementStatus } from "../../services";
+import {
+  fetchAllLeadRequirements,
+  getAllCandidates,
+  updateRequirementStatus,
+} from "../../services";
 import { Modal, Button } from "react-bootstrap";
 
 export default function LeadPostedRequirements({ onCountUpdate }) {
@@ -8,18 +12,17 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedReq, setSelectedReq] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [type, setType] = useState("assigned"); // "assigned" or "created"
   const reqsPerPage = 5;
 
   useEffect(() => {
     loadRequirements();
-  }, [type]);
+  }, []);
 
   const loadRequirements = async () => {
     try {
       setLoading(true);
 
-      // Fetch all lead requirements (both assigned & created)
+      // ✅ Single merged API call now
       const allRequirements = await fetchAllLeadRequirements();
       const candidatesRes = await getAllCandidates();
 
@@ -27,24 +30,24 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
         ? candidatesRes.candidates
         : candidatesRes?.data?.candidates || [];
 
-      // Filter by selected type
-      const filteredReqs = allRequirements.filter(req => req.type === type);
-
-      // Map candidate submissions
+      // 🔗 Build requirementId → submissions map
       const submissionMap = {};
-      candidates.forEach(candidate => {
-        const ids = Array.isArray(candidate.requirementId) ? candidate.requirementId : [candidate.requirementId];
-        ids.forEach(id => {
+      candidates.forEach((candidate) => {
+        const ids = Array.isArray(candidate.requirementId)
+          ? candidate.requirementId
+          : [candidate.requirementId];
+        ids.forEach((id) => {
           const trimmed = id?.trim?.();
-          if (trimmed) submissionMap[trimmed] = (submissionMap[trimmed] || 0) + 1;
+          if (trimmed)
+            submissionMap[trimmed] = (submissionMap[trimmed] || 0) + 1;
         });
       });
 
-      const enriched = filteredReqs.map(req => {
+      const enriched = allRequirements.map((req) => {
         const count = submissionMap[req.requirementId?.trim()] || 0;
-        const reqCandidates = candidates.filter(c =>
+        const reqCandidates = candidates.filter((c) =>
           (Array.isArray(c.requirementId) ? c.requirementId : [c.requirementId])
-            .map(id => id.trim())
+            .map((id) => id.trim())
             .includes(req.requirementId?.trim())
         );
         return { ...req, submissionCount: count, candidates: reqCandidates };
@@ -70,7 +73,7 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
     }
   };
 
-  const filtered = requirements.filter(req => {
+  const filtered = requirements.filter((req) => {
     const q = searchQuery.toLowerCase();
     return (
       req.requirementId?.toLowerCase().includes(q) ||
@@ -81,38 +84,26 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
   });
 
   const totalPages = Math.ceil(filtered.length / reqsPerPage);
-  const currentReqs = filtered.slice((currentPage - 1) * reqsPerPage, currentPage * reqsPerPage);
+  const currentReqs = filtered.slice(
+    (currentPage - 1) * reqsPerPage,
+    currentPage * reqsPerPage
+  );
 
   return (
     <section className="mt-4">
-      <div className="mb-3">
-        <Button
-          size="sm"
-          className={`me-2 ${type === "assigned" ? "btn-primary" : "btn-outline-primary"}`}
-          onClick={() => setType("assigned")}
-        >
-          Assigned Requirements
-        </Button>
-        <Button
-          size="sm"
-          className={type === "created" ? "btn-primary" : "btn-outline-primary"}
-          onClick={() => setType("created")}
-        >
-          Created Requirements
-        </Button>
-      </div>
-
+      {/* 🔍 Search */}
       <input
         type="text"
         className="form-control mb-3"
         placeholder="🔍 Search requirements..."
         value={searchQuery}
-        onChange={e => {
+        onChange={(e) => {
           setSearchQuery(e.target.value);
           setCurrentPage(1);
         }}
       />
 
+      {/* 📊 Table */}
       <div className="table-responsive">
         <table className="table table-striped">
           <thead className="table-light">
@@ -135,7 +126,7 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
                 </td>
               </tr>
             ) : (
-              currentReqs.map(req => (
+              currentReqs.map((req) => (
                 <tr key={req._id}>
                   <td>{req.requirementId}</td>
                   <td>
@@ -147,7 +138,8 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
                   <td>{req.priority}</td>
                   <td>{req.duration}</td>
                   <td>
-                    {Array.isArray(req.recruiterAssignedTo) && req.recruiterAssignedTo.length > 0
+                    {Array.isArray(req.recruiterAssignedTo) &&
+                    req.recruiterAssignedTo.length > 0
                       ? req.recruiterAssignedTo.join(", ")
                       : "Not Assigned"}
                   </td>
@@ -156,7 +148,9 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
                     <select
                       className="form-select form-select-sm"
                       value={req.requirementStatus || "open"}
-                      onChange={e => handleStatusChange(req._id, e.target.value)}
+                      onChange={(e) =>
+                        handleStatusChange(req._id, e.target.value)
+                      }
                     >
                       <option value="open">Open</option>
                       <option value="closed">Closed</option>
@@ -169,7 +163,7 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
         </table>
       </div>
 
-      {/* Pagination */}
+      {/* ⏩ Pagination */}
       <div className="d-flex justify-content-between align-items-center mt-3">
         <button
           className="btn btn-outline-secondary btn-sm"
@@ -190,7 +184,7 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
         </button>
       </div>
 
-      {/* Modal */}
+      {/* ℹ️ Modal */}
       <Modal show={!!selectedReq} onHide={() => setSelectedReq(null)}>
         <Modal.Header closeButton>
           <Modal.Title>Requirement Details</Modal.Title>
