@@ -129,17 +129,9 @@ export const bulkAssignRequirements = async (payload) => {
   }
 };
 
-// 4️⃣ Fetch all requirements assigned to this lead (history)
-
-// Assigned to this lead
 
 
-// Created by this lead
 
-
-// Merge both assigned + created
-// Fetch ALL requirements for a lead (already implemented in backend)
-// Fetch ALL requirements for a lead (assigned + created)
 export const fetchAllLeadRequirements = async () => {
   try {
     const token = sessionStorage.getItem("token");
@@ -390,7 +382,7 @@ export const updateCandidateLeadStatus = async (candidateId, leadStatus) => {
 // Fetch all requirements for lead (both created & assigned)
 
 export const fetchAllRequirements = async () => {
-  return axios.get(`${API_URL}/api/requirements/leads/view-all`);
+  return axios.get(`${API_URL}/api/requirements/leads/all`);
 };
 
 
