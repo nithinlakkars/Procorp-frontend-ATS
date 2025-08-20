@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FaTachometerAlt, FaUserTie } from "react-icons/fa";
 import LeadPostedRequirements from "./LeadPostedRequirements";
-
 import NewRequirementsSection from "./NewRequirementsSection";
 import SubmittedCandidates from "./SubmittedCandidates";
 import RequirementHistory from "./RequirementHistory";
@@ -13,6 +12,7 @@ import {
   fetchUnassignedRequirements,
   fetchRecruiters,
   forwardCandidateToSales,
+  fetchRequirementsByLead, // ✅ NEW for Posted Requirements
 } from "../../services";
 import Navbar from "../../componenets/Navbar";
 
@@ -55,36 +55,41 @@ export default function LeadsDashboard() {
   const handleMultiCheckbox = (field, value) => {
     setForm((prev) => {
       const arr = Array.isArray(prev[field]) ? prev[field] : [];
-      if (arr.includes(value)) {
-        return { ...prev, [field]: arr.filter((item) => item !== value) };
-      } else {
-        return { ...prev, [field]: [...arr, value] };
-      }
+      return arr.includes(value)
+        ? { ...prev, [field]: arr.filter((item) => item !== value) }
+        : { ...prev, [field]: [...arr, value] };
     });
   };
 
   useEffect(() => {
     const user = sessionStorage.getItem("user");
     setLeadEmail(user);
-    loadAllData();
+    loadAllData(user);
   }, []);
 
-  const loadAllData = async () => {
+  const loadAllData = async (userEmail) => {
     try {
-      const [candidatesRes, unassignedReqsRes, recruitersRes] = await Promise.all([
+      const [candidatesRes, unassignedReqsRes, recruitersRes, postedRes] = await Promise.all([
         fetchCandidates(),
         fetchUnassignedRequirements(),
         fetchRecruiters(),
+        fetchRequirementsByLead(userEmail), // ✅ get requirements created by this lead
       ]);
 
+      // Normalize
       const unassignedData = Array.isArray(unassignedReqsRes)
         ? unassignedReqsRes
         : unassignedReqsRes?.data || [];
 
       const candidatesList = candidatesRes?.candidates || [];
+      const postedData = Array.isArray(postedRes)
+        ? postedRes
+        : postedRes?.data || [];
+
       setCandidates(candidatesList);
       setRequirements(unassignedData);
       setRecruiters(recruitersRes?.data || []);
+      setPostedReqCount(postedData.length);
 
       const forwarded = candidatesList.filter((c) => c.status === "forwarded-to-sales");
       setForwardedCount(forwarded.length);
@@ -160,6 +165,7 @@ export default function LeadsDashboard() {
                 <div className="text-muted">Manage requirements and assign them to recruiters</div>
               </div>
 
+              {/* Stats */}
               <div className="row mb-4 text-center justify-content-center">
                 <div className="col-md-3">
                   <div className="card border-0 shadow-sm">
@@ -195,6 +201,7 @@ export default function LeadsDashboard() {
                 </div>
               </div>
 
+              {/* Tabs */}
               <ul className="nav nav-tabs mb-4">
                 <li className="nav-item">
                   <button
