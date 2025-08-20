@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { fetchAllRequirements, fetchLeadRequirements, getAllCandidates } from "../../services";
+import { fetchAllLeadRequirements, getAllCandidates,fetchLeadRequirementsAssigned } from "../../services";
+
 
 
 export default function RequirementHistory() {
@@ -14,72 +15,71 @@ export default function RequirementHistory() {
     fetchData();
   }, []);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      console.log("⏳ Fetching requirements and candidates...");
+const fetchData = async () => {
+  try {
+    setLoading(true);
+    console.log("⏳ Fetching requirements and candidates...");
 
-      const [salesRes, leadRes, candidatesRes] = await Promise.all([
-        fetchAllRequirements(),
-        fetchLeadRequirements(),
-        getAllCandidates(),
-      ]);
+    const [salesRes, leadRes, candidatesRes] = await Promise.all([
+      fetchAllLeadRequirements(),        // ✅ renamed
+      fetchLeadRequirementsAssigned(),   // or fetchLeadRequirementsCreated()
+      getAllCandidates(),
+    ]);
 
-  
-      // Normalize Sales requirements (API returns full response)
-      const salesRequirements = Array.isArray(salesRes?.data)
-        ? salesRes.data
-        : Array.isArray(salesRes)
-          ? salesRes
-          : [];
+    // Normalize Sales requirements (API returns full response)
+    const salesRequirements = Array.isArray(salesRes?.data)
+      ? salesRes.data
+      : Array.isArray(salesRes)
+        ? salesRes
+        : [];
 
-      // Normalize Lead requirements (API already returns .data directly)
-      const leadRequirements = Array.isArray(leadRes)
-        ? leadRes
-        : Array.isArray(leadRes?.data)
-          ? leadRes.data
-          : [];
+    // Normalize Lead requirements
+    const leadRequirements = Array.isArray(leadRes)
+      ? leadRes
+      : Array.isArray(leadRes?.data)
+        ? leadRes.data
+        : [];
 
-      // Merge both into one array
-      const requirements = [...salesRequirements, ...leadRequirements];
-      const candidates = Array.isArray(candidatesRes?.candidates)
-        ? candidatesRes.candidates
-        : candidatesRes?.data?.candidates || [];
+    // Merge both into one array
+    const requirements = [...salesRequirements, ...leadRequirements];
+    const candidates = Array.isArray(candidatesRes?.candidates)
+      ? candidatesRes.candidates
+      : candidatesRes?.data?.candidates || [];
 
-      console.log("📋 Requirements Fetched:", requirements.length);
-      console.log("📋 Candidates Fetched:", candidates.length);
+    console.log("📋 Requirements Fetched:", requirements.length);
+    console.log("📋 Candidates Fetched:", candidates.length);
 
-      const submissionMap = {};
+    const submissionMap = {};
 
-      candidates.forEach((candidate) => {
-        const reqIds = Array.isArray(candidate.requirementId)
-          ? candidate.requirementId
-          : [candidate.requirementId];
+    candidates.forEach((candidate) => {
+      const reqIds = Array.isArray(candidate.requirementId)
+        ? candidate.requirementId
+        : [candidate.requirementId];
 
-        reqIds.forEach((reqId) => {
-          const trimmed = reqId?.trim?.();
-          if (trimmed) {
-            submissionMap[trimmed] = (submissionMap[trimmed] || 0) + 1;
-          }
-        });
+      reqIds.forEach((reqId) => {
+        const trimmed = reqId?.trim?.();
+        if (trimmed) {
+          submissionMap[trimmed] = (submissionMap[trimmed] || 0) + 1;
+        }
       });
+    });
 
-      const enrichedReqs = requirements.map((req) => {
-        const reqId = req.requirementId?.trim?.();
-        const count = submissionMap[reqId] || 0;
-        return {
-          ...req,
-          submissionCount: count,
-        };
-      });
+    const enrichedReqs = requirements.map((req) => {
+      const reqId = req.requirementId?.trim?.();
+      const count = submissionMap[reqId] || 0;
+      return {
+        ...req,
+        submissionCount: count,
+      };
+    });
 
-      setAllReqs(enrichedReqs);
-    } catch (error) {
-      console.error("❌ fetchData() error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    setAllReqs(enrichedReqs);
+  } catch (error) {
+    console.error("❌ fetchData() error:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const indexOfLastReq = currentPage * requirementsPerPage;
   const indexOfFirstReq = indexOfLastReq - requirementsPerPage;
