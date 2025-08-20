@@ -139,18 +139,24 @@ export const bulkAssignRequirements = async (payload) => {
 
 // Merge both assigned + created
 // Fetch ALL requirements for a lead (already implemented in backend)
+// Fetch ALL requirements for a lead (assigned + created)
 export const fetchAllLeadRequirements = async () => {
   try {
     const token = sessionStorage.getItem("token");
-    const res = await axios.get(`${API_URL}/api/requirements/leads/all`, {
-      headers: { Authorization: `Bearer ${token}` },
+
+    const res = await axios.get(`${API_URL}/api/requirements/leads/all-requirements`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
+
     return res.data;
   } catch (error) {
-    console.error("❌ Error fetching all lead requirements:", error);
+    console.error("❌ Error fetching all lead requirements:", error.response?.data || error.message);
     return [];
   }
 };
+
 
 
 
