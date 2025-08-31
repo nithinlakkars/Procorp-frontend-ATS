@@ -1,91 +1,124 @@
-import React from "react";
-import { Container, Row, Col, Card, ProgressBar, ListGroup } from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import { Container, Row, Col, Card, Spinner } from "react-bootstrap";
+import axios from "axios";
 
-const AccountManagerDashboard = () => {
-  const stats = [
-    { title: "Active Candidates", value: 145, icon: "bi-people", change: "+12%" },
-    { title: "Open Positions", value: 23, icon: "bi-briefcase", change: "+5%" },
-    { title: "Interviews This Week", value: 32, icon: "bi-calendar-week", change: "+18%" },
-    { title: "Positions Filled", value: 18, icon: "bi-check-circle", change: "+3%" },
+const API_URL = "http://localhost:5000/api/stats/recruiter-dashboard";
+
+const RecruiterDashboard = () => {
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // ✅ Fetch recruiter stats
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const token = sessionStorage.getItem("token");
+
+        const { data } = await axios.get(API_URL, {
+          headers: {
+            Authorization: `Bearer ${token}`, // ✅ template string fixed
+          },
+        });
+
+        console.log("Recruiter dashboard stats:", data);
+        setStats(data);
+      } catch (err) {
+        console.error("Failed to fetch recruiter stats, using dummy data", err);
+
+        // fallback dummy data
+        setStats({
+          assignedRequirements: 5,
+          submissions: 12,
+          activeCandidates: 8,
+          candidateStats: {
+            Applied: 10,
+            "Internal Reject": 3,
+            "Submitted to Client": 5,
+            Interview: 2,
+            Selected: 4,
+            Rejected: 6,
+            Backout: 1,
+            Offer: 2,
+          },
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  // ✅ Top Stat Cards
+  const cards = [
+    { title: "Assigned Requirements", value: stats?.assignedRequirements || 0, icon: "bi-briefcase" },
+    { title: "Submissions", value: stats?.submissions || 0, icon: "bi-upload" },
+    { title: "Active Candidates", value: stats?.activeCandidates || 0, icon: "bi-person-check" },
   ];
 
-  const recentActivity = [
-    { title: "New application", name: "Sarah Johnson", role: "Frontend Developer", time: "2 hours ago" },
-    { title: "Interview scheduled", name: "Michael Chen", role: "Product Manager", time: "5 hours ago" },
-    { title: "Candidate rejected", name: "Emily Rodriguez", role: "UX Designer", time: "Yesterday" },
-    { title: "Offer sent", name: "David Kim", role: "Data Scientist", time: "Yesterday" },
-  ];
-
-  const pipeline = [
-    { stage: "Applied", count: 145 },
-    { stage: "Screening", count: 87 },
-    { stage: "Interview", count: 32 },
-    { stage: "Offer", count: 12 },
-    { stage: "Hired", count: 5 },
-  ];
+  // ✅ Candidate Statuses (8 cards)
+  const candidateStatuses = stats?.candidateStats || {
+    Applied: 0,
+    "Internal Reject": 0,
+    "Submitted to Client": 0,
+    Interview: 0,
+    Selected: 0,
+    Rejected: 0,
+    Backout: 0,
+    Offer: 0,
+  };
 
   return (
     <Container fluid className="p-4">
-      <h4 className="fw-bold mb-4">Dashboard</h4>
+      <h4 className="fw-bold mb-4">Recruiter Dashboard</h4>
 
-      {/* Stat Cards */}
-      <Row className="mb-4">
-        {stats.map((s, idx) => (
-          <Col md={3} key={idx}>
-            <Card className="mb-3 shadow-sm">
-              <Card.Body>
-                <div className="d-flex justify-content-between align-items-center mb-2">
-                  <Card.Title className="mb-0 fs-6">{s.title}</Card.Title>
-                  <i className={`bi ${s.icon} fs-4 text-primary`}></i>
-                </div>
-                <h4 className="fw-bold">{s.value}</h4>
-                <small className="text-success">{s.change} from last month</small>
-              </Card.Body>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+      {loading ? (
+        <div className="text-center">
+          <Spinner animation="border" />
+        </div>
+      ) : (
+        <>
+          {/* ✅ Stat Cards */}
+          <Row className="mb-4">
+            {cards.map((card, idx) => (
+              <Col md={4} key={idx}>
+                <Card className="mb-3 shadow-sm">
+                  <Card.Body>
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <Card.Title className="mb-0 fs-6">{card.title}</Card.Title>
+                      <i className={`bi ${card.icon} fs-4 text-primary`}></i> {/* ✅ fixed template string */}
+                    </div>
+                    <h4 className="fw-bold">{card.value}</h4>
+                  </Card.Body>
+                </Card>
+              </Col>
+            ))}
+          </Row>
 
-      {/* Activity + Pipeline */}
-      <Row>
-        {/* Recent Activity */}
-        <Col md={6}>
-          <Card className="mb-4 shadow-sm">
-            <Card.Body>
-              <Card.Title className="mb-3">Recent Activity</Card.Title>
-              <ListGroup variant="flush">
-                {recentActivity.map((item, idx) => (
-                  <ListGroup.Item key={idx}>
-                    <span className="text-primary fw-semibold">{item.title}</span><br />
-                    <span>{item.name} • {item.role}</span><br />
-                    <small className="text-muted">{item.time}</small>
-                  </ListGroup.Item>
-                ))}
-              </ListGroup>
-            </Card.Body>
-          </Card>
-        </Col>
-
-        {/* Hiring Pipeline */}
-        <Col md={6}>
-          <Card className="mb-4 shadow-sm">
-            <Card.Body>
-              <Card.Title className="mb-3">Hiring Pipeline</Card.Title>
-              <ProgressBar now={60} variant="primary" className="mb-3" />
-              <div className="d-flex justify-content-between text-center">
-                {pipeline.map((step, idx) => (
-                  <div key={idx}>
-                    <div className="fw-semibold">{step.stage}</div>
-                    <small className="text-muted">{step.count}</small>
-                  </div>
-                ))}
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+          {/* ✅ Candidate Status Counts */}
+          <Row>
+            <Col>
+              <Card className="mb-4 shadow-sm">
+                <Card.Body>
+                  <Card.Title className="mb-3">Candidate Statuses</Card.Title>
+                  <Row>
+                    {Object.entries(candidateStatuses).map(([status, count], idx) => (
+                      <Col key={idx} md={3} className="mb-3">
+                        <Card bg="light" className="text-center p-2 h-100">
+                          <h6 className="mb-1">{status}</h6>
+                          <h5 className="fw-bold">{count}</h5>
+                        </Card>
+                      </Col>
+                    ))}
+                  </Row>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+        </>
+      )}
     </Container>
   );
 };
 
-export default AccountManagerDashboard;
+export default RecruiterDashboard;

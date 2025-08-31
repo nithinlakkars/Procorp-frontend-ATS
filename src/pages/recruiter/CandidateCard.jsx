@@ -1,60 +1,56 @@
 import React, { useState, useEffect } from "react";
-import { updateCandidateStatus } from "../../services"; // make sure it's defined
+import { updateCandidateFields } from "../../services"; // make sure this exists
 
-// ✅ Extracted helper function
+// ✅ Helper to map status to Bootstrap badge variant
 const getStatusVariant = (status) => {
   switch (status) {
-    // 🔹 Sales-specific statuses
-    case "forwarded-to-sales":
-      return "primary";
-    case "on-hold":
-      return "warning text-dark";
-
-    // 🔹 Enum statuses
-    case "L1-cleared":
-      return "info"; // light blue
-    case "selected":
-      return "success"; // green
+    case "forwarded-to-sales": return "primary";
+    case "on-hold": return "warning text-dark";
+    case "L1-cleared": return "info";
+    case "selected": return "success";
     case "rejected":
-    case "internal-rejection":
-      return "danger"; // red
+    case "internal-rejection": return "danger";
     case "Waiting-for-update":
-    case "Decision-pending":
-      return "warning"; // yellow
-    case "To-be-interviewed":
-      return "primary"; // blue
+    case "Decision-pending": return "warning";
+    case "To-be-interviewed": return "primary";
     case "submitted":
-    case "submitted-to-client":
-      return "secondary"; // gray
-
-    // 🔹 Fallback
-    default:
-      return "dark"; // default Bootstrap badge
+    case "submitted-to-client": return "secondary";
+    default: return "dark";
   }
 };
-
 
 export default function CandidateCardList({ candidates = [], loadCandidates }) {
   const itemsPerPage = 5;
   const [currentPage, setCurrentPage] = useState(1);
   const [activeStatus, setActiveStatus] = useState({});
 
+  // Initialize activeStatus from candidates
   useEffect(() => {
     const initialStatus = {};
     candidates.forEach((candidate) => {
-      initialStatus[candidate._id] = candidate.isActive || false;
+      initialStatus[candidate._id] = candidate.isActive || "not available";
     });
     setActiveStatus(initialStatus);
   }, [candidates]);
 
-  const toggleActive = (id) => {
-    setActiveStatus((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
+  // ✅ Handle active status change
+  const handleToggleActive = async (candidateId, newStatus) => {
+    try {
+      console.log("Updating active status for:", candidateId, "New:", newStatus);
+      await updateCandidateFields(candidateId, { isActive: newStatus });
+
+      setActiveStatus((prev) => ({
+        ...prev,
+        [candidateId]: newStatus,
+      }));
+
+      console.log("✅ Active status updated locally and backend updated");
+    } catch (error) {
+      console.error("❌ Failed to update active status:", error);
+    }
   };
 
- const totalPages = Math.max(1, Math.ceil(candidates.length / itemsPerPage));
+  const totalPages = Math.max(1, Math.ceil(candidates.length / itemsPerPage));
   const indexOfLast = currentPage * itemsPerPage;
   const indexOfFirst = indexOfLast - itemsPerPage;
   const currentCandidates = candidates.slice(indexOfFirst, indexOfLast);
@@ -84,6 +80,7 @@ export default function CandidateCardList({ candidates = [], loadCandidates }) {
           resumeUrls = [],
           requirementId = [],
           candidate_update,
+          folderId,
         } = candidate;
 
         return (
@@ -92,22 +89,20 @@ export default function CandidateCardList({ candidates = [], loadCandidates }) {
               <div className="d-flex justify-content-between align-items-center">
                 <h5 className="card-title mb-0">{name}</h5>
 
-                {/* ✅ Active Toggle */}
-                <div className="form-check form-switch">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id={`activeSwitch-${_id}`}
-                    checked={!!activeStatus[_id]}
-                    onChange={() => toggleActive(_id)}
-                  />
-                  <label className="form-check-label" htmlFor={`activeSwitch-${_id}`}>
-                    Active
-                  </label>
+                {/* ✅ Active Status Dropdown */}
+                <div>
+                  <select
+                    className="form-select form-select-sm"
+                    value={activeStatus[_id] || "not available"}
+                    onChange={(e) => handleToggleActive(_id, e.target.value)}
+                  >
+                    <option value="available">Available</option>
+                    <option value="not available">Not Available</option>
+                  </select>
                 </div>
               </div>
 
-              {/* ✅ Sales Status Display */}
+              {/* ✅ Sales Status */}
               <p className="mt-2">
                 <strong>Sales Status:</strong>{" "}
                 <span className={`badge bg-${getStatusVariant(candidate_update)}`}>
@@ -115,10 +110,8 @@ export default function CandidateCardList({ candidates = [], loadCandidates }) {
                 </span>
               </p>
 
-              <p>
-                <strong>Requirement ID{requirementId.length > 1 ? "s" : ""}:</strong>{" "}
-                {requirementId.length > 0 ? requirementId.join(", ") : "N/A"}
-              </p>
+              {/* Candidate Info */}
+              <p><strong>Requirement ID{requirementId.length > 1 ? "s" : ""}:</strong> {requirementId.length ? requirementId.join(", ") : "N/A"}</p>
               <p><strong>Candidate ID:</strong> {candidateId || "N/A"}</p>
               <p><strong>Role:</strong> {role || "N/A"}</p>
               <p><strong>Email:</strong> {email || "N/A"}</p>
@@ -129,21 +122,12 @@ export default function CandidateCardList({ candidates = [], loadCandidates }) {
               <p><strong>Passport Number:</strong> {passportnumber || "N/A"}</p>
               <p><strong>Last 4 SSN:</strong> {Last4digitsofSSN || "N/A"}</p>
               <p><strong>Visa Status:</strong> {VisaStatus || "N/A"}</p>
-              <p>
-                <strong>LinkedIn:</strong>{" "}
-                {LinkedinUrl ? (
-                  <a href={LinkedinUrl} target="_blank" rel="noopener noreferrer">
-                    {LinkedinUrl}
-                  </a>
-                ) : (
-                  "N/A"
-                )}
-              </p>
+              <p><strong>LinkedIn:</strong> {LinkedinUrl ? <a href={LinkedinUrl} target="_blank" rel="noopener noreferrer">{LinkedinUrl}</a> : "N/A"}</p>
               <p><strong>Client Details:</strong> {clientdetails || "N/A"}</p>
 
-              {candidate.folderId ? (
+              {folderId ? (
                 <a
-                  href={`https://drive.google.com/drive/folders/${candidate.folderId}`}
+                  href={`https://drive.google.com/drive/folders/${folderId}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn btn-sm btn-outline-success me-2 mb-2"
@@ -153,7 +137,6 @@ export default function CandidateCardList({ candidates = [], loadCandidates }) {
               ) : (
                 <p className="text-muted">No folder link available</p>
               )}
-
             </div>
           </div>
         );
@@ -164,29 +147,19 @@ export default function CandidateCardList({ candidates = [], loadCandidates }) {
         <nav>
           <ul className="pagination mb-0">
             <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-              <button className="page-link" onClick={handlePrev}>
-                &laquo;
-              </button>
+              <button className="page-link" onClick={handlePrev}>&laquo;</button>
             </li>
-
             {Array.from({ length: totalPages }, (_, i) => (
               <li key={i} className={`page-item ${currentPage === i + 1 ? "active" : ""}`}>
-                <button className="page-link" onClick={() => goToPage(i + 1)}>
-                  {i + 1}
-                </button>
+                <button className="page-link" onClick={() => goToPage(i + 1)}>{i + 1}</button>
               </li>
             ))}
-
             <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-              <button className="page-link" onClick={handleNext}>
-                &raquo;
-              </button>
+              <button className="page-link" onClick={handleNext}>&raquo;</button>
             </li>
           </ul>
         </nav>
       </div>
-
-      
     </>
   );
 }

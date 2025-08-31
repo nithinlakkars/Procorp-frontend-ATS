@@ -110,10 +110,13 @@ function RequirementCard({
 
         <button
           className="btn btn-outline-primary btn-sm mt-2"
-          onClick={() => onApplyClick(req._id, req.requirementId, req.title)}
+          onClick={() =>
+            onApplyClick(req._id, req.requirementId, req.title, req.client)
+          }
         >
           Apply
         </button>
+
       </div>
     </div>
   );

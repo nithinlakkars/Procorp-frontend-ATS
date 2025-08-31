@@ -22,7 +22,6 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
     try {
       setLoading(true);
 
-      // ✅ Single merged API call now
       const allRequirements = await fetchAllLeadRequirements();
       const candidatesRes = await getAllCandidates();
 
@@ -30,7 +29,6 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
         ? candidatesRes.candidates
         : candidatesRes?.data?.candidates || [];
 
-      // 🔗 Build requirementId → submissions map
       const submissionMap = {};
       candidates.forEach((candidate) => {
         const ids = Array.isArray(candidate.requirementId)
@@ -91,7 +89,7 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
 
   return (
     <section className="mt-4">
-      {/* 🔍 Search */}
+      {/* Search */}
       <input
         type="text"
         className="form-control mb-3"
@@ -103,7 +101,7 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
         }}
       />
 
-      {/* 📊 Table */}
+      {/* Table */}
       <div className="table-responsive">
         <table className="table table-striped">
           <thead className="table-light">
@@ -113,7 +111,6 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
               <th>Client</th>
               <th>Priority</th>
               <th>Duration</th>
-              <th>Assigned Recruiters</th>
               <th>Submissions</th>
               <th>Status</th>
             </tr>
@@ -121,7 +118,7 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
           <tbody>
             {currentReqs.length === 0 ? (
               <tr>
-                <td colSpan="8" className="text-center text-muted">
+                <td colSpan="7" className="text-center text-muted">
                   No lead requirements found.
                 </td>
               </tr>
@@ -137,12 +134,6 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
                   <td>{req.client}</td>
                   <td>{req.priority}</td>
                   <td>{req.duration}</td>
-                  <td>
-                    {Array.isArray(req.recruiterAssignedTo) &&
-                    req.recruiterAssignedTo.length > 0
-                      ? req.recruiterAssignedTo.join(", ")
-                      : "Not Assigned"}
-                  </td>
                   <td>{req.submissionCount || 0}</td>
                   <td>
                     <select
@@ -163,7 +154,7 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
         </table>
       </div>
 
-      {/* ⏩ Pagination */}
+      {/* Pagination */}
       <div className="d-flex justify-content-between align-items-center mt-3">
         <button
           className="btn btn-outline-secondary btn-sm"
@@ -184,7 +175,7 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
         </button>
       </div>
 
-      {/* ℹ️ Modal */}
+      {/* Modal */}
       <Modal show={!!selectedReq} onHide={() => setSelectedReq(null)}>
         <Modal.Header closeButton>
           <Modal.Title>Requirement Details</Modal.Title>
@@ -204,6 +195,14 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
           </p>
           <p>
             <strong>Primary Skills:</strong> {selectedReq?.primarySkills}
+          </p>
+          {/* Hidden section: Assigned Recruiters */}
+          <p>
+            <strong>Assigned Recruiters:</strong>{" "}
+            {Array.isArray(selectedReq?.recruiterAssignedTo) &&
+            selectedReq?.recruiterAssignedTo.length > 0
+              ? selectedReq.recruiterAssignedTo.join(", ")
+              : "Not Assigned"}
           </p>
         </Modal.Body>
       </Modal>

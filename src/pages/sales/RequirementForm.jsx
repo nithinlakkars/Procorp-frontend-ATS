@@ -174,7 +174,7 @@ export default function RequirementForm({
           )}
         </div>
 
-        <label className="fw-bold mt-3">Assign to Recruiters:</label>
+        {/* <label className="fw-bold mt-3">Assign to Recruiters:</label>
         <div className="mb-2 d-flex flex-wrap">
           {recruiters.length === 0 ? (
             <p className="text-muted">No recruiters available</p>
@@ -194,7 +194,7 @@ export default function RequirementForm({
               </div>
             ))
           )}
-        </div>
+        </div> */}
 
         <label className="fw-bold mt-3">Locations:</label>
         <input
@@ -205,8 +205,10 @@ export default function RequirementForm({
           onChange={(e) => setLocationSearch(e.target.value)}
         />
 
-        {searchResults.length > 0 && (
-          <div className="border rounded p-2 mb-2" style={{ maxHeight: "120px", overflowY: "auto" }}>
+        {/* Search Suggestions + Manual Add */}
+        {(searchResults.length > 0 || locationSearch.trim()) && (
+          <div className="border rounded p-2 mb-2" style={{ maxHeight: "150px", overflowY: "auto" }}>
+            {/* Matching cities */}
             {searchResults.slice(0, 10).map((loc) => (
               <button
                 key={loc}
@@ -220,9 +222,26 @@ export default function RequirementForm({
                 {loc}
               </button>
             ))}
+
+            {/* Allow manual location if not found */}
+            {locationSearch.trim() &&
+              !searchResults.some((res) => res.toLowerCase() === locationSearch.toLowerCase()) &&
+              !form.locations.includes(locationSearch.trim()) && (
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-success me-2 mb-1"
+                  onClick={() => {
+                    handleMultiCheckbox("locations", locationSearch.trim());
+                    setLocationSearch("");
+                  }}
+                >
+                  ➕ Use "{locationSearch}"
+                </button>
+              )}
           </div>
         )}
 
+        {/* Selected Locations */}
         {form.locations?.length > 0 && (
           <div className="mb-2 d-flex flex-wrap">
             {form.locations.map((loc) => (
@@ -244,6 +263,7 @@ export default function RequirementForm({
           </div>
         )}
 
+
         <div className="row">
           <div className="col-md-6 mb-2">
             <select
@@ -256,7 +276,10 @@ export default function RequirementForm({
               <option value="">Select Employment Type</option>
               <option value="W2">W2</option>
               <option value="C2C">C2C</option>
+              <option value="C2H">C2H</option>
+              <option value="Full Time">Full Time</option>
             </select>
+
           </div>
 
           <div className="col-md-6 mb-2">
@@ -306,7 +329,7 @@ export default function RequirementForm({
           <div className="col-md-6 mb-2">
             <div className="mb-3">
               <label className="form-label fw-bold">Work Authorization</label>
-              {["USC", "GC","GC-EAD", "H1B","H4-EAD","TN","L2-EAD","OPT", "Other"].map((option) => (
+              {["USC", "GC", "GC-EAD", "H1B", "H4-EAD", "TN", "L2-EAD", "OPT", "Other"].map((option) => (
                 <div className="form-check" key={option}>
                   <input
                     className="form-check-input"

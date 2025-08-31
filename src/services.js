@@ -189,13 +189,20 @@ export const updateCandidateActiveStatus = async (candidateId, newStatus) => {
 
 export const updateCandidateFields = async (candidateId, updateData) => {
   try {
-    const res = await api.put("/api/candidates/recruiter/update-fields", { candidateId, ...updateData });
+    const res = await api.put("/api/candidates/recruiter/update-fields", {
+      candidateId,
+      ...updateData,
+    });
     return res.data;
   } catch (error) {
-    console.error("❌ Error updating candidate fields:", error.response?.data || error.message);
+    console.error(
+      "❌ Error updating candidate fields:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 };
+
 
 export const updateRequirementStatus = async (requirementId, newStatus) => {
   try {

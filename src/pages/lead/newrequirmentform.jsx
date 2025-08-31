@@ -17,6 +17,7 @@ const requiredFields = [
   "primarySkills",
   "workAuthorization",
   "client",
+  "priority",
 ];
 
 export default function RequirementForm({
@@ -83,6 +84,7 @@ export default function RequirementForm({
         primarySkills: "",
         workAuthorization: [],
         client: "",
+        priority: "",
       });
       setLocationSearch("");
       setSuccessMsg("✅ Requirement submitted successfully!");
@@ -214,7 +216,7 @@ export default function RequirementForm({
         )}
 
         <div className="row">
-          <div className="col-md-6 mb-2">
+          <div className="col-md-4 mb-2">
             <select
               name="employmentType"
               className="form-select"
@@ -225,9 +227,11 @@ export default function RequirementForm({
               <option value="">Select Employment Type</option>
               <option value="W2">W2</option>
               <option value="C2C">C2C</option>
+              <option value="C2H">C2H</option>
+              <option value="Full Time">Full Time</option>
             </select>
           </div>
-          <div className="col-md-6 mb-2">
+          <div className="col-md-4 mb-2">
             <select
               name="workSetting"
               className="form-select"
@@ -241,7 +245,22 @@ export default function RequirementForm({
               <option value="Onsite">Onsite</option>
             </select>
           </div>
+          <div className="col-md-4 mb-2">
+            <select
+              name="priority"
+              className="form-select"
+              value={form.priority || ""}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Select Priority</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
         </div>
+
         <div className="mb-2">
           <select
             name="duration"
@@ -268,7 +287,7 @@ export default function RequirementForm({
 
         <label className="fw-bold mt-3">Work Authorization:</label>
         <div className="mb-2 d-flex flex-wrap">
-          {["USC", "GC","GC-EAD", "H1B","H4-EAD","TN","L2-EAD","OPT", "Other"].map((auth) => (
+          {["USC", "GC", "GC-EAD", "H1B", "H4-EAD", "TN", "L2-EAD", "OPT", "Other"].map((auth) => (
             <div key={auth} className="form-check me-3 mb-1">
               <input
                 type="checkbox"

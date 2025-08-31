@@ -10,7 +10,10 @@ import Navbar from "../../componenets/Navbar";
 import RecruiterMainDashboard from "./recruitermaindashboard";
 import { FaTachometerAlt, FaUserTie } from "react-icons/fa";
 import SubmitCandidateModal from "./SubmitCandidateForm"; // ✅ adjust path if needed
-import { updateCandidateActiveStatus } from "../../services";
+import { updateCandidateFields } from "../../services"; // adjust path if needed
+import { Form } from "react-bootstrap";
+
+
 
 
 export default function RecruiterSubmit() {
@@ -19,7 +22,7 @@ export default function RecruiterSubmit() {
     role: "",
     email: "",
     phone: "",
-    source: "",
+    // source: "",
     currentLocation: "",
     rate: "",
     relocation: "",
@@ -31,7 +34,7 @@ export default function RecruiterSubmit() {
     forwardToLeads: [],
     addedBy: "",
     requirementId: "",
-    resumes: [],
+    Documents: [],
     salesStatus: "",
     workAuthorization: [],
   });
@@ -69,8 +72,7 @@ export default function RecruiterSubmit() {
     try {
       const data = new FormData();
 
-      // Append resume files
-      if (formData.resumes.length === 0) {
+      if (!formData.resumes || formData.resumes.length === 0) {
         alert("Please upload at least one resume.");
         setLoading(false);
         return;
@@ -80,47 +82,33 @@ export default function RecruiterSubmit() {
         data.append("resume", formData.resumes[i]);
       }
 
-      // Append other form fields
-      data.append("name", formData.name);
-      data.append("email", formData.email);
-      data.append("phone", formData.phone);
-      data.append("source", formData.source);
-      data.append("requirementId", formData.requirementId);
-      data.append("currentLocation", formData.currentLocation);
-      data.append("rate", formData.rate);
-      data.append("relocation", formData.relocation);
-      data.append("passportNumber", formData.passportNumber);
-      data.append("last4SSN", formData.last4SSN);
-      data.append("visaStatus", formData.visaStatus);
-      data.append("linkedinUrl", formData.linkedinUrl);
-      data.append("clientDetails", formData.clientDetails);
-      data.append("role", formData.role);
-      data.append("isActive", true); // Default to true
-      data.append("salesStatus", formData.salesStatus);
+      // Append other fields
+      Object.entries(formData).forEach(([key, value]) => {
+        if (key === "resumes" || key === "forwardToLeads" || key === "workAuthorization") return;
+        data.append(key, value);
+      });
+
+      // Work Authorization
       if (Array.isArray(formData.workAuthorization)) {
         data.append("workAuthorization", formData.workAuthorization.join(","));
-      } else {
-        data.append("workAuthorization", formData.workAuthorization || "");
       }
 
-      // Append selected leads
+      // Leads
       if (formData.forwardToLeads && formData.forwardToLeads.length > 0) {
-        formData.forwardToLeads.forEach((leadEmail) =>
-          data.append("forwardToLeads[]", leadEmail)
-        );
+        formData.forwardToLeads.forEach((lead) => data.append("forwardToLeads[]", lead));
       }
 
-      const response = await submitCandidate(data); // ← Your service function
-
-      console.log("📦 Full Backend Response:", response); //
+      const response = await submitCandidate(data);
 
       if (response?.candidate) {
-        alert("❌ Submission failed. Please try again.");
+        // ✅ Prepend the new submission to the top of the list
+        setSubmittedCandidates((prev) => [response.candidate, ...prev]);
 
-        setShowModal(false);
-        await fetchData(); // Refresh list
-      } else {
         alert("✅ Candidate submitted successfully");
+        setShowModal(false);
+        setFormData({ ...formData, resumes: [] }); // Reset resumes if needed
+      } else {
+        alert("❌ Submission failed. Please try again.");
       }
     } catch (error) {
       console.error("Error submitting candidate:", error);
@@ -129,6 +117,7 @@ export default function RecruiterSubmit() {
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
     if (!userEmail) return;
@@ -148,14 +137,17 @@ export default function RecruiterSubmit() {
         )
         : [];
 
-      const processedCandidates = myCandidates.map((c) => ({
-        ...c,
-        isActive: typeof c.isActive === "boolean" ? c.isActive : true,
-        interviewScheduled:
-          typeof c.interviewScheduled === "boolean"
-            ? c.interviewScheduled
-            : false,
-      }));
+      const processedCandidates = myCandidates
+        .map((c) => ({
+          ...c,
+          isActive: typeof c.isActive === "boolean" ? c.isActive : true,
+          interviewScheduled:
+            typeof c.interviewScheduled === "boolean"
+              ? c.interviewScheduled
+              : false,
+        }))
+        // Sort newest first
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
       setSubmittedCandidates(processedCandidates);
 
@@ -165,21 +157,21 @@ export default function RecruiterSubmit() {
       console.error("❌ Failed to fetch data", err);
     }
   };
-  const handleToggleActive = async (candidateId, currentStatus) => {
-    try {
-      console.log("Toggling active status for:", candidateId, "Current:", currentStatus);
-      await updateCandidateActiveStatus(candidateId, !currentStatus);
-      console.log("✅ Backend updated active status");
 
-      setSubmittedCandidates((prevCandidates) => {
-        const updated = prevCandidates.map((candidate) =>
+  const handleToggleActive = async (candidateId, newStatus) => {
+    try {
+      console.log("Updating active status for:", candidateId, "New:", newStatus);
+      await updateCandidateFields(candidateId, { isActive: newStatus }); // pass string
+
+      setSubmittedCandidates((prevCandidates) =>
+        prevCandidates.map((candidate) =>
           candidate._id === candidateId
-            ? { ...candidate, isActive: !currentStatus }
+            ? { ...candidate, isActive: newStatus }
             : candidate
-        );
-        console.log("🧠 Updated local state:", updated);
-        return updated;
-      });
+        )
+      );
+
+      console.log("✅ Active status updated locally and backend updated");
     } catch (error) {
       console.error("❌ Failed to update active status:", error);
     }
@@ -189,16 +181,21 @@ export default function RecruiterSubmit() {
 
 
 
-  const onApplyClick = (reqId, requirementId, title) => {
-    console.log("Apply Clicked", { reqId, requirementId, title }); // ✅ Helpful Debug
+
+
+  const onApplyClick = (reqId, requirementId, title, client) => {
+    console.log("Apply Clicked", { reqId, requirementId, title, client });
     setShowFormId(reqId);
     setFormData((prev) => ({
       ...prev,
-      requirementId: requirementId,
+      requirementId,
       role: title,
+      clientDetails: client,  // ✅ corrected
     }));
-    setShowModal(true); // ✅ THIS makes the modal appear
+    setShowModal(true);
   };
+
+
 
 
 
@@ -384,18 +381,11 @@ export default function RecruiterSubmit() {
                         <thead className="table-light">
                           <tr>
                             <th>Requirement ID</th>
-                            <th>Title</th>
+                            <th>Position</th>
                             <th>Client</th>
-                            <th>Location</th>
-                            <th>Rate</th>
-                            <th>Duration</th> {/* ✅ New column */}
                             <th>Priority</th>
-                            <th>Employment Type</th>
-                            <th>Work Authorization</th>
-                            <th>Work Setting</th>
                             <th>Posted Date</th>
                             <th>Status</th>
-                            <th>Created By</th>
                             <th>Submitted Candidates</th>
                             <th>Actions</th>
                           </tr>
@@ -413,66 +403,88 @@ export default function RecruiterSubmit() {
                               <React.Fragment key={req._id}>
                                 <tr>
                                   <td>{req.requirementId}</td>
-                                  <td>{req.title}</td>
-                                  <td>{req.client || "N/A"}</td>
-                                  <td>{req.locations?.join(", ")}</td>
-                                  <td>{req.rate || "N/A"}</td>
-                                  <td>{req.duration || "N/A"}</td> {/* ✅ Duration value */}
-                                  <td>{req.priority || "N/A"}</td>
-                                  <td>{req.employmentType}</td>
+
+                                  {/* ✅ Position column (Title + Location + Work Setting) */}
                                   <td>
-                                    {Array.isArray(req.workAuthorization)
-                                      ? req.workAuthorization.join(", ")
-                                      : req.workAuthorization}
+                                    <button
+                                      className="btn btn-link p-0 text-primary fw-semibold"
+                                      onClick={() =>
+                                        setExpandedReq(expandedReq === req._id ? null : req._id)
+                                      }
+                                    >
+                                      {req.title || "Untitled"}
+                                    </button>
+                                    <div className="text-muted small">
+                                      {(Array.isArray(req.locations)
+                                        ? req.locations.join(", ")
+                                        : req.locations) || "N/A"}{" "}
+                                      | {req.workSetting || "N/A"}
+                                    </div>
                                   </td>
-                                  <td>{req.workSetting}</td>
+
+                                  <td>{req.client || "N/A"}</td>
+                                  <td>{req.priority || "N/A"}</td>
                                   <td>{new Date(req.createdAt).toLocaleDateString()}</td>
                                   <td>
                                     <span
-                                      className={`badge ${req.status === "closed" ? "bg-danger" : "bg-success"
+                                      className={`badge ${req.requirementStatus === "closed"
+                                        ? "bg-danger"
+                                        : "bg-success"
                                         }`}
                                     >
                                       {req.requirementStatus?.toUpperCase() || "OPEN"}
                                     </span>
                                   </td>
-                                  <td>{req.createdBy}</td>
                                   <td>{submissionCount}</td>
                                   <td>
                                     <button
-                                      className="btn btn-sm btn-primary"
+                                      className="btn btn-sm btn-success"
                                       onClick={() =>
-                                        setExpandedReq(
-                                          expandedReq === req._id ? null : req._id
-                                        )
+                                        onApplyClick(req._id, req.requirementId, req.title, req.client)
                                       }
                                     >
-                                      {expandedReq === req._id ? "Hide" : "View"}
+                                      Apply
                                     </button>
                                   </td>
                                 </tr>
 
+                                {/* Expanded Row → Hidden Fields */}
                                 {expandedReq === req._id && (
                                   <tr>
-                                    <td colSpan="14">
-                                      <div className="p-2">
+                                    <td colSpan="8">
+                                      <div className="p-3 bg-light rounded shadow-sm">
                                         <p>
-                                          <strong>Skills:</strong> {req.primarySkills}
+                                          <strong>Employment Type:</strong>{" "}
+                                          {req.employmentType || "N/A"}
                                         </p>
                                         <p>
-                                          <strong>Description:</strong> {req.description}
+                                          <strong>Duration:</strong>{" "}
+                                          {req.duration || "N/A"}
                                         </p>
-                                        <button
-                                          className="btn btn-outline-success btn-sm"
-                                          onClick={() =>
-                                            onApplyClick(
-                                              req._id,
-                                              req.requirementId,
-                                              req.title
-                                            )
-                                          }
-                                        >
-                                          Apply
-                                        </button>
+                                        <p>
+                                          <strong>Rate:</strong>{" "}
+                                          {req.rate || "N/A"}
+                                        </p>
+                                        <p>
+                                          <strong>Work Authorization:</strong>{" "}
+                                          {Array.isArray(req.workAuthorization)
+                                            ? req.workAuthorization.join(", ")
+                                            : req.workAuthorization || "N/A"}
+                                        </p>
+                                        <p>
+                                          <strong>Created By:</strong>{" "}
+                                          {req.createdBy || "N/A"}
+                                        </p>
+                                        <p>
+                                          <strong>Primary Skills:</strong>{" "}
+                                          {Array.isArray(req.primarySkills)
+                                            ? req.primarySkills.join(", ")
+                                            : req.primarySkills || "N/A"}
+                                        </p>
+                                        <p>
+                                          <strong>Job Description:</strong>{" "}
+                                          {req.description || "No description provided."}
+                                        </p>
                                       </div>
                                     </td>
                                   </tr>
@@ -483,6 +495,7 @@ export default function RecruiterSubmit() {
                         </tbody>
                       </table>
 
+                      {/* Pagination */}
                       <div className="d-flex justify-content-between align-items-center mt-2">
                         <div>
                           Showing {indexOfFirstReq + 1}–
@@ -514,6 +527,9 @@ export default function RecruiterSubmit() {
                 </>
               )}
 
+
+
+
               {/* <li className="nav-item">
                   <button
                     className={`nav-link ${
@@ -534,68 +550,108 @@ export default function RecruiterSubmit() {
                         <th>Candidate ID</th>
                         <th>Name</th>
                         <th>Role</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Rate</th>
-                        <th>Location</th>
-                        <th>Visa</th>
                         <th>Requirement ID</th>
-                        <th>Resume</th>
+                        <th>Documents</th>
                         <th>Status</th>
                         <th>Active</th>
-                        <th>Sales Update</th>
-                        <th>Lead Status</th> {/* New column */}
+                        {/* Sales Update & Lead Update removed from main row */}
                       </tr>
                     </thead>
                     <tbody>
                       {currentSubmittedCandidates.map((candidate) => (
-                        <tr key={candidate._id}>
-                          <td>{candidate.candidateId}</td>
-                          <td>{candidate.name}</td>
-                          <td>{candidate.role}</td>
-                          <td>{candidate.email}</td>
-                          <td>{candidate.phone}</td>
-                          <td>{candidate.rate}</td>
-                          <td>{candidate.currentLocation}</td>
-                          <td>{candidate.VisaStatus}</td>
-                          <td>
-                            {Array.isArray(candidate.requirementId)
-                              ? candidate.requirementId.join(", ")
-                              : candidate.requirementId}
-                          </td>
-                          <td>
-                            {candidate.resumeUrls && candidate.resumeUrls.length > 0 ? (
-                              <a
-                                href={candidate.resumeUrls[0]}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="btn btn-sm btn-outline-success"
+                        <React.Fragment key={candidate._id}>
+                          <tr>
+                            <td>{candidate.candidateId}</td>
+
+                            {/* Name as expand/collapse button */}
+                            <td>
+                              <button
+                                className="btn btn-link p-0 text-primary fw-semibold"
+                                onClick={() =>
+                                  setExpandedReq(
+                                    expandedReq === candidate._id ? null : candidate._id
+                                  )
+                                }
                               >
-                                📁 View documents
-                              </a>
-                            ) : (
-                              "No Folder"
-                            )}
-                          </td>
-                          <td>{candidate.status || "Submitted"}</td>
-                          <td>
-                            <input
-                              type="checkbox"
-                              checked={!!candidate.isActive}
-                              onChange={() => handleToggleActive(candidate._id, candidate.isActive ?? false)}
-                            />
-                          </td>
-                          <td>
-                            <span className={`badge ${getStatusVariant(candidate.candidate_update)}`}>
-                              {candidate.candidate_update || "Submitted"}
-                            </span>
-                          </td>
-                          <td>
-                            <span className={`badge ${getStatusVariant(candidate.lead_update)}`}>
-                              {candidate.lead_update || "Pending"} {/* Lead status */}
-                            </span>
-                          </td>
-                        </tr>
+                                {candidate.name}
+                              </button>
+                            </td>
+
+                            <td>{candidate.role || "N/A"}</td>
+
+                            <td>
+                              {Array.isArray(candidate.requirementId)
+                                ? candidate.requirementId.join(", ")
+                                : candidate.requirementId}
+                            </td>
+
+                            <td>
+                              {candidate.resumeUrls && candidate.resumeUrls.length > 0 ? (
+                                <a
+                                  href={candidate.resumeUrls[0]}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="btn btn-sm btn-outline-success"
+                                >
+                                  📁 View documents
+                                </a>
+                              ) : (
+                                "No Folder"
+                              )}
+                            </td>
+
+                            <td>{candidate.status || "Submitted"}</td>
+
+                            {/* Active dropdown instead of checkbox */}
+                            <td>
+                              <Form.Select
+                                size="sm"
+                                value={candidate.isActive || "available"}
+                                onChange={(e) => handleToggleActive(candidate._id, e.target.value)}
+                              >
+                                <option value="available">Available</option>
+                                <option value="not available">Not Available</option>
+                              </Form.Select>
+                            </td>
+
+                          </tr>
+
+                          {/* Expanded Row with extra details */}
+                          {expandedReq === candidate._id && (
+                            <tr>
+                              <td colSpan="9">
+                                <div className="p-3 bg-light rounded shadow-sm">
+                                  <p>
+                                    <strong>Email:</strong> {candidate.email || "N/A"}
+                                  </p>
+                                  <p>
+                                    <strong>Rate:</strong> {candidate.rate || "N/A"}
+                                  </p>
+                                  <p>
+                                    <strong>Visa:</strong> {candidate.VisaStatus || "N/A"}
+                                  </p>
+                                  <p>
+                                    <strong>Phone:</strong> {candidate.phone || "N/A"}
+                                  </p>
+                                  <p>
+                                    <strong>Location:</strong>{" "}
+                                    {candidate.currentLocation || "N/A"}
+                                  </p>
+
+                                  {/* ✅ Sales & Lead Update visible only here */}
+                                  <p>
+                                    <strong>Sales Update:</strong>{" "}
+                                    {candidate.candidate_update || "Submitted"}
+                                  </p>
+                                  <p>
+                                    <strong>Lead Update:</strong>{" "}
+                                    {candidate.lead_update || "Pending"}
+                                  </p>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
                       ))}
                     </tbody>
                   </table>
@@ -603,7 +659,9 @@ export default function RecruiterSubmit() {
                   {/* Pagination Controls */}
                   <div className="d-flex justify-content-between align-items-center mt-2">
                     <div>
-                      Showing {indexOfFirstSubmitted + 1}–{Math.min(indexOfLastSubmitted, submittedCandidates.length)} of {submittedCandidates.length} candidates
+                      Showing {indexOfFirstSubmitted + 1}–
+                      {Math.min(indexOfLastSubmitted, submittedCandidates.length)} of{" "}
+                      {submittedCandidates.length} candidates
                     </div>
                     <div>
                       <button
@@ -613,7 +671,9 @@ export default function RecruiterSubmit() {
                       >
                         ◀ Prev
                       </button>
-                      <span>Page {currentSubmittedPage} of {totalSubmittedPages}</span>
+                      <span>
+                        Page {currentSubmittedPage} of {totalSubmittedPages}
+                      </span>
                       <button
                         className="btn btn-sm btn-outline-secondary ms-2"
                         disabled={currentSubmittedPage === totalSubmittedPages}
@@ -625,6 +685,10 @@ export default function RecruiterSubmit() {
                   </div>
                 </div>
               )}
+
+
+
+
 
 
 

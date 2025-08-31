@@ -111,18 +111,33 @@ export default function ForwardedCandidates({ onCountUpdate }) {
     clientdetails: "Client Details",
   };
 
-  const filteredCandidates = forwardedCandidates.filter((candidate) => {
-    const query = searchQuery.toLowerCase();
-    return (
-      candidate.name?.toLowerCase().includes(query) ||
-      candidate.role?.toLowerCase().includes(query) ||
-      candidate.client?.toLowerCase().includes(query) ||
-      candidate.forwardedBy?.toLowerCase().includes(query) ||
-      candidate.addedBy?.toLowerCase().includes(query) ||
-      candidate.requirementId?.toLowerCase().includes(query) ||
-      candidate.candidateId?.toLowerCase().includes(query)
-    );
-  });
+const searchableFields = [
+  "candidateId",
+  "name",
+  "role",
+  "requirementId",
+  "forwardedBy",
+  "addedBy",
+  "email",
+  "phone",
+  "rate",
+  "VisaStatus",
+  "candidate_update",
+  "currentLocation",
+  "relocation",
+  "passportnumber",
+  "Last4digitsofSSN",
+  "LinkedinUrl",
+  "clientdetails",
+];
+
+const filteredCandidates = forwardedCandidates.filter((candidate) => {
+  const query = searchQuery.toLowerCase();
+  return searchableFields.some((field) =>
+    (candidate[field] || "").toString().toLowerCase().includes(query)
+  );
+});
+
 
   const totalPages = Math.ceil(filteredCandidates.length / pageSize);
   const paginatedCandidates = filteredCandidates.slice(
@@ -180,13 +195,13 @@ export default function ForwardedCandidates({ onCountUpdate }) {
                         return <td key={i}>{candidate[field] || "N/A"}</td>;
                       }
                     })}
-
                     <td>
-                      {candidate.isActive ? (
-                        <span className="badge bg-success">Active</span>
-                      ) : (
-                        <span className="badge bg-secondary">Inactive</span>
-                      )}
+                      <span
+                        className={`badge ${candidate.isActive === "available" ? "bg-success" : "bg-secondary"
+                          }`}
+                      >
+                        {candidate.isActive === "available" ? "Available" : "Not Available"}
+                      </span>
                     </td>
 
                     <td>

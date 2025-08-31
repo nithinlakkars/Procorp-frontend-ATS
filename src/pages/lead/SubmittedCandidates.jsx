@@ -5,7 +5,6 @@ import { updateCandidateLeadStatus } from "../../services";
 export default function SubmittedCandidates({
   candidates = [],
   forwardCandidateToSales,
-  setCandidates,
   leadEmail,
   setMessage,
   loadCandidates,
@@ -24,57 +23,91 @@ export default function SubmittedCandidates({
 
   const handleForward = async (id) => {
     try {
-      const res = await forwardCandidateToSales(id, {
-        forwardedBy: leadEmail,
-      });
-      setMessage(res.data.message);
-      await loadCandidates();
-    } catch {
+      const res = await forwardCandidateToSales(id, { forwardedBy: leadEmail });
+
+      // ✅ Check if the backend returned success
+      if (res?.data?.success) {
+        setMessage(res.data.message || "✅ Candidate forwarded successfully");
+        await loadCandidates();
+      } else {
+        setMessage(res?.data?.message || "❌ Forwarding failed");
+      }
+    } catch (err) {
+      console.error("Forwarding error:", err);
       setMessage("❌ Forwarding failed");
     }
   };
 
   const toggleExpand = (id) => {
     setExpandedRows((prev) =>
-      prev.includes(id)
-        ? prev.filter((rowId) => rowId !== id)
-        : [...prev, id]
+      prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]
     );
   };
 
-  // Update handleStatusChange to use lead_update
   const handleLeadStatusChange = async (candidateId, newStatus) => {
     try {
       await updateCandidateLeadStatus(candidateId, newStatus);
-      await loadCandidates(); // refresh table
+      await loadCandidates();
     } catch (err) {
       console.error("❌ Failed to update lead status:", err);
       setMessage("❌ Failed to update lead status");
     }
   };
 
-  const visibleFields = [
-    "candidateId",
-    "name",
-    "role",
+  const getStatusVariant = (status) => {
+    switch (status) {
+      case "L1-cleared":
+        return "info";
+      case "selected":
+        return "success";
+      case "rejected":
+      case "internal-rejection":
+        return "danger";
+      case "Waiting-for-update":
+      case "Decision-pending":
+        return "warning";
+      case "To-be-interviewed":
+        return "primary";
+      case "submitted":
+      case "submitted-to-client":
+        return "secondary";
+      default:
+        return "dark";
+    }
+  };
+
+  // 🔹 Visible fields in table
+  const visibleFields = ["candidateId", "name", "role", "requirementId"];
+
+  // 🔹 Hidden fields inside collapse
+  const hiddenFields = [
     "email",
     "phone",
     "rate",
     "addedBy",
     "VisaStatus",
-    "requirementId",
-  ];
-
-  const hiddenFields = [
-    "source",
+    "candidate_update",
     "currentLocation",
     "relocation",
     "passportnumber",
     "Last4digitsofSSN",
     "LinkedinUrl",
-    "clientdetails",
-    "forwardedBy",
-  ];
+    "clientdetails"
+  ]
+    ;
+
+  const fieldLabels = {
+    candidateId: "Candidate ID",
+    name: "Candidate Name",
+    role: "Role",
+    requirementId: "Requirement ID",
+    email: "Email",
+    phone: "Phone",
+    rate: "Rate",
+    addedBy: "Added By",
+    VisaStatus: "Visa Status",
+    candidate_update: "Sales Update",
+  };
 
   const indexOfLast = currentPage * candidatesPerPage;
   const indexOfFirst = indexOfLast - candidatesPerPage;
@@ -82,48 +115,20 @@ export default function SubmittedCandidates({
   const totalPages = Math.ceil(candidates.length / candidatesPerPage);
 
   const handlePageChange = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
-
-  const getStatusVariant = (status) => {
-    switch (status) {
-      case "L1-cleared":
-        return "info"; // light blue
-      case "selected":
-        return "success"; // green
-      case "rejected":
-      case "internal-rejection":
-        return "danger"; // red
-      case "Waiting-for-update":
-      case "Decision-pending":
-        return "warning"; // yellow
-      case "To-be-interviewed":
-        return "primary"; // blue
-      case "submitted":
-      case "submitted-to-client":
-        return "secondary"; // gray
-      default:
-        return "dark"; // fallback
-    }
-  };
-
 
   return (
     <section className="container mt-4">
       <Table hover responsive className="border-bottom">
         <thead>
           <tr className="text-muted">
-            {visibleFields.map((field, i) => (
-              <th key={i} className="text-capitalize">
-                {field === "requirementId" ? "Requirement ID" : field}
-              </th>
+            {visibleFields.map((field) => (
+              <th key={field}>{fieldLabels[field] || field}</th>
             ))}
-            <th>Resume</th>
+            <th>Documents</th>
+            <th>Status</th>
             <th>Active</th>
-            <th>Sales Status</th>
-            <th>Sales Update</th>
             <th>Lead Update</th>
             <th>Actions</th>
           </tr>
@@ -133,11 +138,23 @@ export default function SubmittedCandidates({
             currentCandidates.map((candidate) => (
               <React.Fragment key={candidate._id}>
                 <tr>
-                  {visibleFields.map((field, i) => (
-                    <td key={i}>{candidate[field] || "N/A"}</td>
-                  ))}
+                  {visibleFields.map((field) =>
+                    field === "name" ? (
+                      <td key={field}>
+                        <Button
+                          variant="link"
+                          className="p-0 text-decoration-none"
+                          onClick={() => toggleExpand(candidate._id)}
+                        >
+                          {candidate[field] || "N/A"}
+                        </Button>
+                      </td>
+                    ) : (
+                      <td key={field}>{candidate[field] || "N/A"}</td>
+                    )
+                  )}
 
-                  {/* Resume URLs */}
+                  {/* Documents */}
                   <td>
                     {candidate.resumeUrls?.length > 0 ? (
                       <a
@@ -153,30 +170,22 @@ export default function SubmittedCandidates({
                     )}
                   </td>
 
-                  {/* Active badge */}
-                  <td>
-                    <span
-                      className={`badge ${candidate.isActive ? "bg-success" : "bg-secondary"}`}
-                    >
-                      {candidate.isActive ? "Active" : "Inactive"}
-                    </span>
-                  </td>
-
-                  {/* Sales Status */}
-                  <td>
-                    <Badge bg={getStatusVariant(candidate.status)}>
-                      {candidate.status || "N/A"}
-                    </Badge>
-                  </td>
-
-                  {/* Sales Update */}
+                  {/* Status */}
                   <td>
                     <Badge bg={getStatusVariant(candidate.candidate_update)}>
                       {candidate.candidate_update || "N/A"}
                     </Badge>
                   </td>
 
-
+                  {/* Active */}
+                  <td>
+                    <span
+                      className={`badge ${candidate.isActive === "available" ? "bg-success" : "bg-secondary"
+                        }`}
+                    >
+                      {candidate.isActive === "available" ? "Available" : "Not Available"}
+                    </span>
+                  </td>
 
                   {/* Lead Update */}
                   <td>
@@ -196,37 +205,31 @@ export default function SubmittedCandidates({
                       <option value="submitted-to-client">Submitted to Client</option>
                       <option value="submitted">Submitted</option>
                     </Form.Select>
-
                   </td>
 
+                  {/* Action: Forward to Sales */}
                   <td>
                     <Button
                       size="sm"
-                      variant="link"
-                      onClick={() => toggleExpand(candidate._id)}
+                      variant="success"
+                      onClick={() => handleForward(candidate._id)}
                     >
-                      {expandedRows.includes(candidate._id) ? "Hide" : "View More"}
+                      Forward to Sales
                     </Button>
                   </td>
                 </tr>
 
+                {/* Hidden Fields */}
                 <tr>
-                  <td colSpan={visibleFields.length + 6} className="p-0">
+                  <td colSpan={visibleFields.length + 5} className="p-0">
                     <Collapse in={expandedRows.includes(candidate._id)}>
                       <div className="p-3 bg-light text-dark">
                         {hiddenFields.map((field) => (
                           <p key={field} className="mb-1">
-                            <strong className="text-capitalize">{field}:</strong>{" "}
+                            <strong>{fieldLabels[field] || field}:</strong>{" "}
                             {candidate[field] || "N/A"}
                           </p>
                         ))}
-                        <Button
-                          size="sm"
-                          variant="success"
-                          onClick={() => handleForward(candidate._id)}
-                        >
-                          Forward to Sales
-                        </Button>
                       </div>
                     </Collapse>
                   </td>
@@ -235,7 +238,7 @@ export default function SubmittedCandidates({
             ))
           ) : (
             <tr>
-              <td colSpan={visibleFields.length + 6} className="text-center">
+              <td colSpan={visibleFields.length + 5} className="text-center">
                 No candidates submitted yet.
               </td>
             </tr>
@@ -243,14 +246,14 @@ export default function SubmittedCandidates({
         </tbody>
       </Table>
 
-      {/* Pagination Controls */}
+      {/* Pagination */}
       <div className="d-flex justify-content-center align-items-center mt-3">
         <Button
           size="sm"
           variant="outline-primary"
           className="me-2"
-          onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
+          onClick={() => handlePageChange(currentPage - 1)}
         >
           ◀ Previous
         </Button>
@@ -261,8 +264,8 @@ export default function SubmittedCandidates({
           size="sm"
           variant="outline-primary"
           className="ms-2"
-          onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
+          onClick={() => handlePageChange(currentPage + 1)}
         >
           Next ▶
         </Button>

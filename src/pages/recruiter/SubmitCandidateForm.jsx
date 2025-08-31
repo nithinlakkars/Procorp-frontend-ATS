@@ -14,12 +14,28 @@ export default function SubmitCandidateModal({
   handleLeadSelect,
 }) {
   return (
-    <Modal show={show} onHide={handleClose} centered size="lg" backdrop="static" keyboard={true}>
+    <Modal
+      show={show}
+      onHide={handleClose}
+      centered
+      size="lg"
+      backdrop="static"
+      keyboard={true}
+    >
       <Modal.Header closeButton>
-        <Modal.Title>Submit Candidate for {requirement?.title}</Modal.Title>
+        <Modal.Title>
+          Submit Candidate for {requirement?.title}
+          {formData?.clientDetails && (
+            <span className="text-muted ms-2">
+              (Client: {formData.clientDetails})
+            </span>
+          )}
+        </Modal.Title>
       </Modal.Header>
+
       <Form onSubmit={handleSubmit}>
         <Modal.Body>
+          {/* Candidate Name */}
           <Form.Group className="mb-3">
             <Form.Label>
               Candidate Name <span style={{ color: "red" }}>*</span>
@@ -33,6 +49,7 @@ export default function SubmitCandidateModal({
             />
           </Form.Group>
 
+          {/* Role */}
           <Form.Group className="mb-3">
             <Form.Label>
               Role <span style={{ color: "red" }}>*</span>
@@ -46,6 +63,21 @@ export default function SubmitCandidateModal({
             />
           </Form.Group>
 
+          {/* Client */}
+          <Form.Group className="mb-3">
+            <Form.Label>
+              Client <span style={{ color: "red" }}>*</span>
+            </Form.Label>
+            <Form.Control
+              type="text"
+              name="clientDetails"
+              value={formData.clientDetails}
+              onChange={handleChange}
+              required
+            />
+          </Form.Group>
+
+          {/* Email */}
           <Form.Group className="mb-3">
             <Form.Label>
               Email <span style={{ color: "red" }}>*</span>
@@ -59,6 +91,7 @@ export default function SubmitCandidateModal({
             />
           </Form.Group>
 
+          {/* Phone */}
           <Form.Group className="mb-3">
             <Form.Label>
               Phone <span style={{ color: "red" }}>*</span>
@@ -72,16 +105,7 @@ export default function SubmitCandidateModal({
             />
           </Form.Group>
 
-          <Form.Group className="mb-3">
-            <Form.Label>Source</Form.Label>
-            <Form.Control
-              type="text"
-              name="source"
-              value={formData.source}
-              onChange={handleChange}
-            />
-          </Form.Group>
-
+          {/* Current Location */}
           <Form.Group className="mb-3">
             <Form.Label>
               Current Location <span style={{ color: "red" }}>*</span>
@@ -95,6 +119,7 @@ export default function SubmitCandidateModal({
             />
           </Form.Group>
 
+          {/* Rate */}
           <Form.Group className="mb-3">
             <Form.Label>
               Rate <span style={{ color: "red" }}>*</span>
@@ -108,6 +133,7 @@ export default function SubmitCandidateModal({
             />
           </Form.Group>
 
+          {/* Relocation */}
           <Form.Group className="mb-3">
             <Form.Label>
               Relocation <span style={{ color: "red" }}>*</span>
@@ -121,6 +147,7 @@ export default function SubmitCandidateModal({
             />
           </Form.Group>
 
+          {/* Passport Number */}
           <Form.Group className="mb-3">
             <Form.Label>Passport Number</Form.Label>
             <Form.Control
@@ -131,6 +158,7 @@ export default function SubmitCandidateModal({
             />
           </Form.Group>
 
+          {/* Last 4 SSN */}
           <Form.Group className="mb-3">
             <Form.Label>
               Last 4 digits SSN <span style={{ color: "red" }}>*</span>
@@ -144,6 +172,7 @@ export default function SubmitCandidateModal({
             />
           </Form.Group>
 
+          {/* Visa Status */}
           <Form.Group className="mb-3">
             <Form.Label>
               Visa Status <span style={{ color: "red" }}>*</span>
@@ -157,6 +186,7 @@ export default function SubmitCandidateModal({
             />
           </Form.Group>
 
+          {/* LinkedIn URL */}
           <Form.Group className="mb-3">
             <Form.Label>LinkedIn URL</Form.Label>
             <Form.Control
@@ -167,20 +197,7 @@ export default function SubmitCandidateModal({
             />
           </Form.Group>
 
-          <Form.Group className="mb-3">
-            <Form.Label>
-              Client Details <span style={{ color: "red" }}>*</span>
-            </Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={2}
-              name="clientDetails"
-              value={formData.clientDetails}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
-
+          {/* Resume Files */}
           <Form.Group className="mb-3">
             <Form.Label>
               Resume Files <span style={{ color: "red" }}>*</span>
@@ -194,6 +211,7 @@ export default function SubmitCandidateModal({
             />
           </Form.Group>
 
+          {/* Leads Assignment */}
           <div className="mb-3">
             <label className="fw-bold">Assign to Leads:</label>
             <div className="d-flex flex-wrap">
