@@ -29,6 +29,14 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
         ? candidatesRes.candidates
         : candidatesRes?.data?.candidates || [];
 
+      // ✅ Only keep requirements created by LEAD
+      const leadOnlyReqs = (Array.isArray(allRequirements) ? allRequirements : []).filter(
+        (req) => req.createdByRole?.toLowerCase() === "lead"
+      );
+
+      // 📌 Debug
+      console.log("📌 Lead-only Requirements:", leadOnlyReqs);
+
       const submissionMap = {};
       candidates.forEach((candidate) => {
         const ids = Array.isArray(candidate.requirementId)
@@ -36,12 +44,11 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
           : [candidate.requirementId];
         ids.forEach((id) => {
           const trimmed = id?.trim?.();
-          if (trimmed)
-            submissionMap[trimmed] = (submissionMap[trimmed] || 0) + 1;
+          if (trimmed) submissionMap[trimmed] = (submissionMap[trimmed] || 0) + 1;
         });
       });
 
-      const enriched = allRequirements.map((req) => {
+      const enriched = leadOnlyReqs.map((req) => {
         const count = submissionMap[req.requirementId?.trim()] || 0;
         const reqCandidates = candidates.filter((c) =>
           (Array.isArray(c.requirementId) ? c.requirementId : [c.requirementId])
@@ -51,7 +58,7 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
         return { ...req, submissionCount: count, candidates: reqCandidates };
       });
 
-      setRequirements(enriched);
+      setRequirements(enriched.reverse());
       onCountUpdate?.(enriched.length);
     } catch (err) {
       console.error("❌ Failed to load lead requirements:", err);
@@ -196,11 +203,10 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
           <p>
             <strong>Primary Skills:</strong> {selectedReq?.primarySkills}
           </p>
-          {/* Hidden section: Assigned Recruiters */}
           <p>
             <strong>Assigned Recruiters:</strong>{" "}
             {Array.isArray(selectedReq?.recruiterAssignedTo) &&
-            selectedReq?.recruiterAssignedTo.length > 0
+              selectedReq?.recruiterAssignedTo.length > 0
               ? selectedReq.recruiterAssignedTo.join(", ")
               : "Not Assigned"}
           </p>
