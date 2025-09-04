@@ -22,13 +22,12 @@ export default function RequirementHistory() {
       const token = sessionStorage.getItem("token");
       if (!token) throw new Error("No token found in session storage.");
 
-      // ✅ Fetch all requirements assigned + created for this lead
+      // ✅ Fetch all requirements assigned + created + admin posted
       const [leadRequirements, candidatesRes] = await Promise.all([
         fetchAllLeadRequirements(),
         getAllCandidates(),
       ]);
 
-      // Normalize arrays
       const requirements = Array.isArray(leadRequirements)
         ? leadRequirements
         : leadRequirements?.data || [];
@@ -50,7 +49,7 @@ export default function RequirementHistory() {
         });
       });
 
-      // Attach submission count to requirements
+      // Attach submission count
       const enrichedReqs = requirements.map((req) => {
         const reqId = req.requirementId?.trim?.();
         const count = submissionMap[reqId] || 0;
@@ -77,6 +76,16 @@ export default function RequirementHistory() {
 
   const toggleExpand = (id) => {
     setExpandedId((prevId) => (prevId === id ? null : id));
+  };
+
+  // 👇 Helper to label who created it
+  const getCreatedByLabel = (req) => {
+    if (req.createdByRole === "admin") {
+      return `Admin: ${req.createdBy}`;
+    } else if (req.createdByRole === "lead") {
+      return `Lead: ${req.createdBy}`;
+    }
+    return `User: ${req.createdBy}`;
   };
 
   return (
@@ -119,8 +128,9 @@ export default function RequirementHistory() {
                     <strong>Requirement ID:</strong>{" "}
                     <span className="text-dark">{req.requirementId || "N/A"}</span>
                     <br />
-                    <strong>Sales:</strong> {req.createdBy || "N/A"} <br />
-                    <strong>Lead:</strong>{" "}
+                    {/* ✅ Now shows Admin OR Lead clearly */}
+                    <strong>Created By:</strong> {getCreatedByLabel(req)} <br />
+                    <strong>Lead Assigned:</strong>{" "}
                     {Array.isArray(req.leadAssignedTo)
                       ? req.leadAssignedTo.join(", ")
                       : req.leadAssignedTo || "—"}{" "}
