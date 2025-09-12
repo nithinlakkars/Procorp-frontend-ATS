@@ -553,7 +553,7 @@ export default function RecruiterSubmit() {
                         <th>Requirement ID</th>
                         <th>Documents</th>
                         <th>Status</th>
-                        <th>Submitted Date</th>   {/* ✅ New Column */}
+                        <th>Submitted Date</th> {/* ✅ New column */}
                         <th>Active</th>
                       </tr>
                     </thead>
@@ -602,19 +602,21 @@ export default function RecruiterSubmit() {
 
                             <td>{candidate.status || "Submitted"}</td>
 
-                            {/* ✅ New Submitted Date Column */}
+                            {/* ✅ Submitted Date Column */}
                             <td>
                               {candidate.createdAt
-                                ? new Date(candidate.createdAt).toLocaleDateString()
+                                ? new Date(candidate.createdAt).toISOString().split("T")[0]
                                 : "N/A"}
                             </td>
 
-                            {/* Active dropdown */}
+                            {/* Active dropdown instead of checkbox */}
                             <td>
                               <Form.Select
                                 size="sm"
                                 value={candidate.isActive || "available"}
-                                onChange={(e) => handleToggleActive(candidate._id, e.target.value)}
+                                onChange={(e) =>
+                                  handleToggleActive(candidate._id, e.target.value)
+                                }
                               >
                                 <option value="available">Available</option>
                                 <option value="not available">Not Available</option>
@@ -622,7 +624,7 @@ export default function RecruiterSubmit() {
                             </td>
                           </tr>
 
-                          {/* Expanded Row */}
+                          {/* Expanded Row with extra details */}
                           {expandedReq === candidate._id && (
                             <tr>
                               <td colSpan="9">
@@ -660,7 +662,7 @@ export default function RecruiterSubmit() {
                     </tbody>
                   </table>
 
-                  {/* Pagination */}
+                  {/* Pagination Controls */}
                   <div className="d-flex justify-content-between align-items-center mt-2">
                     <div>
                       Showing {indexOfFirstSubmitted + 1}–
