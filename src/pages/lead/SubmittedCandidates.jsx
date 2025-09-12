@@ -30,8 +30,8 @@ export default function SubmittedCandidates({
         return;
       }
 
-      const user = JSON.parse(userStr); // parse the JSON string
-      const leadEmail = user.email;      // get the email
+      const user = JSON.parse(userStr);
+      const leadEmail = user.email;
       if (!leadEmail) {
         alert("❌ Lead email not found. Please log in again.");
         return;
@@ -46,8 +46,6 @@ export default function SubmittedCandidates({
       alert("❌ Failed to forward candidate");
     }
   };
-
-
 
   const toggleExpand = (id) => {
     setExpandedRows((prev) =>
@@ -103,9 +101,9 @@ export default function SubmittedCandidates({
     "passportnumber",
     "Last4digitsofSSN",
     "LinkedinUrl",
-    "clientdetails"
-  ]
-    ;
+    "clientdetails",
+    "submittedDate", // Added Submitted Date here
+  ];
 
   const fieldLabels = {
     candidateId: "Candidate ID",
@@ -118,6 +116,7 @@ export default function SubmittedCandidates({
     addedBy: "Added By",
     VisaStatus: "Visa Status",
     candidate_update: "Sales Update",
+    submittedDate: "Submitted Date", // Added label
   };
 
   const indexOfLast = currentPage * candidatesPerPage;
@@ -138,7 +137,6 @@ export default function SubmittedCandidates({
               <th key={field}>{fieldLabels[field] || field}</th>
             ))}
             <th>Documents</th>
-
             <th>Active</th>
             <th>SalesStatus</th>
             <th>Lead Update</th>
@@ -182,15 +180,18 @@ export default function SubmittedCandidates({
                     )}
                   </td>
 
-
-
                   {/* Active */}
                   <td>
                     <span
-                      className={`badge ${candidate.isActive === "available" ? "bg-success" : "bg-secondary"
-                        }`}
+                      className={`badge ${
+                        candidate.isActive === "available"
+                          ? "bg-success"
+                          : "bg-secondary"
+                      }`}
                     >
-                      {candidate.isActive === "available" ? "Available" : "Not Available"}
+                      {candidate.isActive === "available"
+                        ? "Available"
+                        : "Not Available"}
                     </span>
                   </td>
 
@@ -206,18 +207,21 @@ export default function SubmittedCandidates({
                     <Form.Select
                       size="sm"
                       value={candidate.lead_update || ""}
-                      onChange={(e) => handleLeadStatusChange(candidate._id, e.target.value)}
+                      onChange={(e) =>
+                        handleLeadStatusChange(candidate._id, e.target.value)
+                      }
                     >
                       <option value="">Select</option>
                       <option value="Applied">Applied</option>
                       <option value="Internal Reject">Internal Reject</option>
-                      <option value="submitted to client">Submitted to Client</option>
+                      <option value="submitted to client">
+                        Submitted to Client
+                      </option>
                       <option value="interview">Interview</option>
                       <option value="selected">Selected</option>
                       <option value="Rejected">Rejected</option>
                       <option value="backout">Backout</option>
                       <option value="offer">offer</option>
-
                     </Form.Select>
                   </td>
 
@@ -241,7 +245,11 @@ export default function SubmittedCandidates({
                         {hiddenFields.map((field) => (
                           <p key={field} className="mb-1">
                             <strong>{fieldLabels[field] || field}:</strong>{" "}
-                            {candidate[field] || "N/A"}
+                            {field === "submittedDate"
+                              ? new Date(candidate.createdAt)
+                                  .toISOString()
+                                  .split("T")[0]
+                              : candidate[field] || "N/A"}
                           </p>
                         ))}
                       </div>
