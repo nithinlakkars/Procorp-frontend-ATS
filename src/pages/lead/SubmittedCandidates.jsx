@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Table, Button, Collapse, Badge, Form } from "react-bootstrap";
 import { updateCandidateLeadStatus } from "../../services";
+import { forwardCandidateToSales } from "../../services";
 
 export default function SubmittedCandidates({
   candidates = [],
@@ -21,22 +22,32 @@ export default function SubmittedCandidates({
     setCurrentPage(1);
   }, [candidates]);
 
-  const handleForward = async (id) => {
+  const handleForward = async (candidateId) => {
     try {
-      const res = await forwardCandidateToSales(id, { forwardedBy: leadEmail });
-
-      // ✅ Check if the backend returned success
-      if (res?.data?.success) {
-        setMessage(res.data.message || "✅ Candidate forwarded successfully");
-        await loadCandidates();
-      } else {
-        setMessage(res?.data?.message || "❌ Forwarding failed");
+      const userStr = sessionStorage.getItem("user");
+      if (!userStr) {
+        alert("❌ User not found in session. Please log in again.");
+        return;
       }
-    } catch (err) {
-      console.error("Forwarding error:", err);
-      setMessage("❌ Forwarding failed");
+
+      const user = JSON.parse(userStr); // parse the JSON string
+      const leadEmail = user.email;      // get the email
+      if (!leadEmail) {
+        alert("❌ Lead email not found. Please log in again.");
+        return;
+      }
+
+      const salesEmail = "sales@procorpsystems.com"; // Or dynamic emails
+      await forwardCandidateToSales(candidateId, leadEmail, salesEmail);
+
+      alert("✅ Candidate forwarded successfully!");
+    } catch (error) {
+      console.error("Forwarding error:", error);
+      alert("❌ Failed to forward candidate");
     }
   };
+
+
 
   const toggleExpand = (id) => {
     setExpandedRows((prev) =>
@@ -56,19 +67,19 @@ export default function SubmittedCandidates({
 
   const getStatusVariant = (status) => {
     switch (status) {
-      case "L1-cleared":
+      case "Applied":
         return "info";
-      case "selected":
+      case "Internal Reject":
         return "success";
-      case "rejected":
-      case "internal-rejection":
+      case "submitted to client":
+      case "interview":
         return "danger";
-      case "Waiting-for-update":
-      case "Decision-pending":
+      case "selected":
+      case "Rejected":
         return "warning";
-      case "To-be-interviewed":
+      case "Backout":
         return "primary";
-      case "submitted":
+      case "offer":
       case "submitted-to-client":
         return "secondary";
       default:
@@ -127,8 +138,9 @@ export default function SubmittedCandidates({
               <th key={field}>{fieldLabels[field] || field}</th>
             ))}
             <th>Documents</th>
-            <th>Status</th>
+
             <th>Active</th>
+            <th>SalesStatus</th>
             <th>Lead Update</th>
             <th>Actions</th>
           </tr>
@@ -170,12 +182,7 @@ export default function SubmittedCandidates({
                     )}
                   </td>
 
-                  {/* Status */}
-                  <td>
-                    <Badge bg={getStatusVariant(candidate.candidate_update)}>
-                      {candidate.candidate_update || "N/A"}
-                    </Badge>
-                  </td>
+
 
                   {/* Active */}
                   <td>
@@ -187,6 +194,13 @@ export default function SubmittedCandidates({
                     </span>
                   </td>
 
+                  {/* Status */}
+                  <td>
+                    <Badge bg={getStatusVariant(candidate.candidate_update)}>
+                      {candidate.candidate_update || "N/A"}
+                    </Badge>
+                  </td>
+
                   {/* Lead Update */}
                   <td>
                     <Form.Select
@@ -195,15 +209,15 @@ export default function SubmittedCandidates({
                       onChange={(e) => handleLeadStatusChange(candidate._id, e.target.value)}
                     >
                       <option value="">Select</option>
-                      <option value="L1-cleared">L1 Cleared</option>
+                      <option value="Applied">Applied</option>
+                      <option value="Internal Reject">Internal Reject</option>
+                      <option value="submitted to client">Submitted to Client</option>
+                      <option value="interview">Interview</option>
                       <option value="selected">Selected</option>
-                      <option value="rejected">Rejected</option>
-                      <option value="Waiting-for-update">Waiting for update</option>
-                      <option value="To-be-interviewed">To be interviewed</option>
-                      <option value="Decision-pending">Decision pending</option>
-                      <option value="internal-rejection">Internal Rejection</option>
-                      <option value="submitted-to-client">Submitted to Client</option>
-                      <option value="submitted">Submitted</option>
+                      <option value="Rejected">Rejected</option>
+                      <option value="backout">Backout</option>
+                      <option value="offer">offer</option>
+
                     </Form.Select>
                   </td>
 

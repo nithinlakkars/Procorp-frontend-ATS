@@ -37,7 +37,7 @@ export default function PostedRequirements({ onCountUpdate }) {
         ? candidatesRes.candidates
         : candidatesRes?.data?.candidates || [];
 
-      setAllCandidates(candidates); // ✅ store all candidates
+      setAllCandidates(candidates);
 
       // Build submission map
       const submissionMap = {};
@@ -55,10 +55,9 @@ export default function PostedRequirements({ onCountUpdate }) {
       const enrichedRequirements = requirementData.map((req) => {
         const count = submissionMap[req.requirementId?.trim()] || 0;
 
-        // ✅ attach relevant candidates
-        const reqCandidates = candidates.filter(c =>
+        const reqCandidates = candidates.filter((c) =>
           (Array.isArray(c.requirementId) ? c.requirementId : [c.requirementId])
-            .map(id => id.trim())
+            .map((id) => id.trim())
             .includes(req.requirementId?.trim())
         );
 
@@ -67,7 +66,6 @@ export default function PostedRequirements({ onCountUpdate }) {
 
       setSubmittedReqs(enrichedRequirements);
       onCountUpdate?.(enrichedRequirements.length);
-
     } catch (error) {
       console.error("❌ Failed to load requirements or candidates:", error);
     } finally {
@@ -75,14 +73,10 @@ export default function PostedRequirements({ onCountUpdate }) {
     }
   };
 
-
   const handleStatusChange = async (requirementId, newStatus) => {
     try {
       await updateRequirementStatus(requirementId, newStatus);
-
-      // ✅ Refetch updated requirements
-      await loadRequirements(); // reloads everything including submissionCount
-
+      await loadRequirements();
     } catch (err) {
       console.error("Failed to update requirement status", err);
     }
@@ -94,12 +88,7 @@ export default function PostedRequirements({ onCountUpdate }) {
       req.requirementId?.toLowerCase().includes(query) ||
       req.title?.toLowerCase().includes(query) ||
       req.client?.toLowerCase().includes(query) ||
-      req.priority?.toLowerCase().includes(query) ||
-      (Array.isArray(req.leadAssignedTo)
-        ? req.leadAssignedTo.some((lead) =>
-          lead.toLowerCase().includes(query)
-        )
-        : req.leadAssignedTo?.toLowerCase().includes(query))
+      req.priority?.toLowerCase().includes(query)
     );
   });
 
@@ -129,12 +118,10 @@ export default function PostedRequirements({ onCountUpdate }) {
           <thead className="table-light">
             <tr>
               <th>Requirement ID</th>
-              <th>Position</th>
+              <th>Role</th>
               <th>Client</th>
               <th>Priority</th>
-              <th>Duration</th> {/* <-- New column */}
-              <th>Assigned Lead(s)</th>
-              <th>Assigned Recruiter(s)</th>
+              <th>Duration</th>
               <th>Submitted Count</th>
               <th>Status</th>
             </tr>
@@ -142,7 +129,7 @@ export default function PostedRequirements({ onCountUpdate }) {
           <tbody>
             {currentReqs.length === 0 ? (
               <tr>
-                <td colSpan="8" className="text-center text-muted">
+                <td colSpan="7" className="text-center text-muted">
                   No matching requirements found.
                 </td>
               </tr>
@@ -168,17 +155,6 @@ export default function PostedRequirements({ onCountUpdate }) {
                   <td>{req.client || "N/A"}</td>
                   <td>{req.priority || "N/A"}</td>
                   <td>{req.duration || "N/A"}</td>
-                  <td>
-                    {Array.isArray(req.leadAssignedTo)
-                      ? req.leadAssignedTo.join(", ")
-                      : req.leadAssignedTo || "N/A"}
-                  </td>
-                  <td>
-                    {Array.isArray(req.recruiterAssignedTo) &&
-                      req.recruiterAssignedTo.length > 0
-                      ? req.recruiterAssignedTo.join(", ")
-                      : "Not Assigned"}
-                  </td>
                   <td>{req.submissionCount || 0}</td>
                   <td>
                     <select

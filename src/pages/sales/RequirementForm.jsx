@@ -78,7 +78,7 @@ export default function RequirementForm({
         leadAssignedTo: [],
         recruiterAssignedTo: [],
         locations: [],
-        employmentType: "",
+        employmentType: [],
         workSetting: "",
         workAuthorization: [],
         rate: "",
@@ -127,7 +127,7 @@ export default function RequirementForm({
 
   return (
     <div className="card p-4 mb-5 shadow">
-      <h4 className="mb-3 text-success">📋 Post New Requirement</h4>
+      <h4 className="mb-3 text-success"> Post New Requirement</h4>
       {successMsg && <div className="alert alert-success">{successMsg}</div>}
       {errorMsg && <div className="alert alert-danger">{errorMsg}</div>}
 
@@ -266,20 +266,22 @@ export default function RequirementForm({
 
         <div className="row">
           <div className="col-md-6 mb-2">
-            <select
-              name="employmentType"
-              className="form-select"
-              value={form.employmentType}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select Employment Type</option>
-              <option value="W2">W2</option>
-              <option value="C2C">C2C</option>
-              <option value="C2H">C2H</option>
-              <option value="Full Time">Full Time</option>
-            </select>
-
+            <label className="form-label fw-bold">Employment Type</label>
+            {["W2", "C2C", "C2H", "Full Time"].map((type) => (
+              <div className="form-check" key={type}>
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  id={`emp-${type}`}
+                  checked={form.employmentType?.includes(type) || false}
+                  onChange={() => handleMultiCheckbox("employmentType", type)}
+                  required={form.employmentType?.length === 0} // ensures at least one is selected
+                />
+                <label className="form-check-label" htmlFor={`emp-${type}`}>
+                  {type}
+                </label>
+              </div>
+            ))}
           </div>
 
           <div className="col-md-6 mb-2">

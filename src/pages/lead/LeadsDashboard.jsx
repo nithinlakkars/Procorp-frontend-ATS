@@ -1,19 +1,22 @@
 import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FaTachometerAlt, FaUserTie } from "react-icons/fa";
+
 import LeadPostedRequirements from "./LeadPostedRequirements";
 import NewRequirementsSection from "./NewRequirementsSection";
 import SubmittedCandidates from "./SubmittedCandidates";
 import RequirementHistory from "./RequirementHistory";
 import Newrequirmentform from "./newrequirmentform";
 import LeadMainDashboard from "./leadmaindashboard";
+
 import {
   fetchCandidates,
   fetchUnassignedRequirements,
   fetchRecruiters,
   forwardCandidateToSales,
-  fetchAllRequirements, // 
+  fetchAllRequirements,
 } from "../../services";
+
 import Navbar from "../../componenets/Navbar";
 
 export default function LeadsDashboard() {
@@ -73,15 +76,15 @@ export default function LeadsDashboard() {
         fetchCandidates(),
         fetchUnassignedRequirements(),
         fetchRecruiters(),
-        fetchAllRequirements(),// ✅ get requirements created by this lead
+        fetchAllRequirements(),
       ]);
 
-      // Normalize
       const unassignedData = Array.isArray(unassignedReqsRes)
         ? unassignedReqsRes
         : unassignedReqsRes?.data || [];
 
       const candidatesList = candidatesRes?.candidates || [];
+
       const postedData = Array.isArray(postedRes?.data)
         ? postedRes.data
         : Array.isArray(postedRes)
@@ -157,7 +160,12 @@ export default function LeadsDashboard() {
       {/* Main Content */}
       <div className="flex-grow-1">
         {selectedView === "dashboard" ? (
-          <LeadMainDashboard />
+          <LeadMainDashboard
+            requirements={requirements}
+            postedReqCount={postedReqCount}
+            candidates={candidates}
+            forwardedCount={forwardedCount}
+          />
         ) : (
           <div className="container-fluid">
             <Navbar />
@@ -165,42 +173,6 @@ export default function LeadsDashboard() {
               <div className="p-4">
                 <h2 className="fw-bold">Talent Acquisition Lead</h2>
                 <div className="text-muted">Manage requirements and assign them to recruiters</div>
-              </div>
-
-              {/* Stats */}
-              <div className="row mb-4 text-center justify-content-center">
-                <div className="col-md-3">
-                  <div className="card border-0 shadow-sm">
-                    <div className="card-body">
-                      <div className="text-muted mb-1">New Requirements</div>
-                      <div className="h3 fw-bold">{requirements.length}</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-md-3">
-                  <div className="card border-0 shadow-sm">
-                    <div className="card-body">
-                      <div className="text-muted mb-1">Posted Requirements</div>
-                      <div className="h3 fw-bold">{postedReqCount}</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-md-3">
-                  <div className="card border-0 shadow-sm">
-                    <div className="card-body">
-                      <div className="text-muted mb-1">Submitted Candidates</div>
-                      <div className="h3 fw-bold">{candidates.length}</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-md-3">
-                  <div className="card border-0 shadow-sm">
-                    <div className="card-body">
-                      <div className="text-muted mb-1">Forwarded to Sales</div>
-                      <div className="h3 fw-bold">{forwardedCount}</div>
-                    </div>
-                  </div>
-                </div>
               </div>
 
               {/* Tabs */}

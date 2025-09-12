@@ -71,12 +71,13 @@ export default function LeadPostedRequirements({ onCountUpdate }) {
 
   const handleStatusChange = async (id, newStatus) => {
     try {
-      await updateRequirementStatus(id, newStatus);
-      await loadRequirements();
+      await updateRequirementStatus(id, newStatus); // keys now match backend
+      await loadRequirements(); // reload updated requirements
     } catch (err) {
       console.error("❌ Failed to update requirement status", err);
     }
   };
+
 
   const filtered = requirements.filter((req) => {
     const q = searchQuery.toLowerCase();

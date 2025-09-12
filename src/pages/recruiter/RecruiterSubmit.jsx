@@ -325,7 +325,7 @@ export default function RecruiterSubmit() {
               <h2 className="fw-bold">Talent Acquisition Recruiter</h2>
               <p className="text-muted">Source candidates for assigned requirements</p>
 
-              <div className="row g-3 mb-4">
+              {/* <div className="row g-3 mb-4">
                 <div className="col-md-6">
                   <div className="card shadow-sm text-center p-3">
                     <div className="text-muted">Assigned Requirements</div>
@@ -339,7 +339,7 @@ export default function RecruiterSubmit() {
 
                   </div>
                 </div>
-              </div>
+              </div> */}
 
               <ul className="nav nav-tabs mb-4">
                 <li className="nav-item">

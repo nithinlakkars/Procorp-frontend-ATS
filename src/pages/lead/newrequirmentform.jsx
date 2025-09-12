@@ -77,7 +77,7 @@ export default function RequirementForm({
         description: "",
         recruiterEmails: [],
         locations: [],
-        employmentType: "",
+        employmentType: [],
         workSetting: "",
         duration: "",
         rate: "",
@@ -174,11 +174,12 @@ export default function RequirementForm({
           value={locationSearch}
           onChange={(e) => setLocationSearch(e.target.value)}
         />
-        {searchResults.length > 0 && (
+        {(searchResults.length > 0 || locationSearch.trim()) && (
           <div
             className="border rounded p-2 mb-2"
             style={{ maxHeight: "120px", overflowY: "auto" }}
           >
+            {/* Matching cities */}
             {searchResults.slice(0, 10).map((loc) => (
               <button
                 key={loc}
@@ -192,8 +193,27 @@ export default function RequirementForm({
                 {loc}
               </button>
             ))}
+
+            {/* Allow manual location if not found */}
+            {locationSearch.trim() &&
+              !searchResults.some(
+                (res) => res.toLowerCase() === locationSearch.toLowerCase()
+              ) &&
+              !locationsArray.includes(locationSearch.trim()) && (
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-success me-2 mb-1"
+                  onClick={() => {
+                    handleMultiCheckbox("locations", locationSearch.trim());
+                    setLocationSearch("");
+                  }}
+                >
+                  ➕ Use "{locationSearch}"
+                </button>
+              )}
           </div>
         )}
+
         {locationsArray.length > 0 && (
           <div className="mb-2">
             {locationsArray.map((loc) => (
@@ -216,21 +236,25 @@ export default function RequirementForm({
         )}
 
         <div className="row">
-          <div className="col-md-4 mb-2">
-            <select
-              name="employmentType"
-              className="form-select"
-              value={form.employmentType}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select Employment Type</option>
-              <option value="W2">W2</option>
-              <option value="C2C">C2C</option>
-              <option value="C2H">C2H</option>
-              <option value="Full Time">Full Time</option>
-            </select>
+          <div className="col-md-6 mb-2">
+            <label className="form-label fw-bold">Employment Type</label>
+            {["W2", "C2C", "C2H", "Full Time"].map((type) => (
+              <div className="form-check" key={type}>
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  id={`emp-${type}`}
+                  checked={form.employmentType?.includes(type) || false}
+                  onChange={() => handleMultiCheckbox("employmentType", type)}
+                  required={form.employmentType?.length === 0} // ensures at least one is selected
+                />
+                <label className="form-check-label" htmlFor={`emp-${type}`}>
+                  {type}
+                </label>
+              </div>
+            ))}
           </div>
+
           <div className="col-md-4 mb-2">
             <select
               name="workSetting"

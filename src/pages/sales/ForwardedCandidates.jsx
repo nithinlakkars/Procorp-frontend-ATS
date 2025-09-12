@@ -44,7 +44,6 @@ export default function ForwardedCandidates({ onCountUpdate }) {
     try {
       await updateCandidateFields(candidateId, { candidate_update: newStatus });
 
-      // Update local state immediately
       setForwardedCandidates((prev) =>
         prev.map((c) =>
           c._id === candidateId ? { ...c, candidate_update: newStatus } : c
@@ -68,17 +67,17 @@ export default function ForwardedCandidates({ onCountUpdate }) {
     }
   };
 
+  // ✅ Removed forwardedBy & addedBy from visibleFields
   const visibleFields = [
     "candidateId",
     "name",
     "role",
-    // "client",
-    "forwardedBy",
-    "addedBy",
     "requirementId",
   ];
 
   const hiddenFields = [
+    "forwardedBy", // moved here
+    "addedBy",     // moved here
     "email",
     "phone",
     "rate",
@@ -111,33 +110,32 @@ export default function ForwardedCandidates({ onCountUpdate }) {
     clientdetails: "Client Details",
   };
 
-const searchableFields = [
-  "candidateId",
-  "name",
-  "role",
-  "requirementId",
-  "forwardedBy",
-  "addedBy",
-  "email",
-  "phone",
-  "rate",
-  "VisaStatus",
-  "candidate_update",
-  "currentLocation",
-  "relocation",
-  "passportnumber",
-  "Last4digitsofSSN",
-  "LinkedinUrl",
-  "clientdetails",
-];
+  const searchableFields = [
+    "candidateId",
+    "name",
+    "role",
+    "requirementId",
+    "forwardedBy",
+    "addedBy",
+    "email",
+    "phone",
+    "rate",
+    "VisaStatus",
+    "candidate_update",
+    "currentLocation",
+    "relocation",
+    "passportnumber",
+    "Last4digitsofSSN",
+    "LinkedinUrl",
+    "clientdetails",
+  ];
 
-const filteredCandidates = forwardedCandidates.filter((candidate) => {
-  const query = searchQuery.toLowerCase();
-  return searchableFields.some((field) =>
-    (candidate[field] || "").toString().toLowerCase().includes(query)
-  );
-});
-
+  const filteredCandidates = forwardedCandidates.filter((candidate) => {
+    const query = searchQuery.toLowerCase();
+    return searchableFields.some((field) =>
+      (candidate[field] || "").toString().toLowerCase().includes(query)
+    );
+  });
 
   const totalPages = Math.ceil(filteredCandidates.length / pageSize);
   const paginatedCandidates = filteredCandidates.slice(
@@ -229,16 +227,14 @@ const filteredCandidates = forwardedCandidates.filter((candidate) => {
                         }
                       >
                         <option value="">Select</option>
-                        <option value="L1-cleared">L1 Cleared</option>
+                        <option value="Applied">Applied</option>
+                        <option value="Internal Reject">Internal Reject</option>
+                        <option value="submitted to client">Submitted to Client</option>
+                        <option value="interview">Interview</option>
                         <option value="selected">Selected</option>
-                        <option value="rejected">Rejected</option>
-                        <option value="Waiting-for-update">Waiting for update</option>
-                        <option value="To-be-interviewed">To be interviewed</option>
-                        <option value="Decision-pending">Decision pending</option>
-                        <option value="internal-rejection">Internal Rejection</option>
-                        <option value="submitted-to-client">Submitted to Client</option>
-                        <option value="submitted">Submitted</option>
-
+                        <option value="Rejected">Rejected</option>
+                        <option value="backout">Backout</option>
+                        <option value="offer">offer</option>
                       </Form.Select>
                     </td>
                   </tr>

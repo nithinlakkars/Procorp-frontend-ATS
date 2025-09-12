@@ -1,91 +1,183 @@
-import React from "react";
-import { Container, Row, Col, Card, ProgressBar, ListGroup } from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import { Container, Row, Col, Card, Spinner, Table, Modal } from "react-bootstrap";
+import axios from "axios";
 
-const AccountManagerDashboard = () => {
-  const stats = [
-    { title: "Active Candidates", value: 145, icon: "bi-people", change: "+12%" },
-    { title: "Open Positions", value: 23, icon: "bi-briefcase", change: "+5%" },
-    { title: "Interviews This Week", value: 32, icon: "bi-calendar-week", change: "+18%" },
-    { title: "Positions Filled", value: 18, icon: "bi-check-circle", change: "+3%" },
+const API_URL = process.env.REACT_APP_API_URL;
+
+// All possible candidate statuses
+const ALL_STATUSES = [
+  "Applied",
+  "Internal Reject",
+  "submitted to client",
+  "interview",
+  "selected",
+  "Rejected",
+  "Backout",
+  "Offer"
+];
+
+const LeadDashboard = () => {
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedList, setSelectedList] = useState([]);
+  const [listTitle, setListTitle] = useState("");
+  const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const token = sessionStorage.getItem("token");
+        const { data } = await axios.get(`${API_URL}/api/stats/lead-dashboard`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setStats(data);
+      } catch (err) {
+        console.error("❌ Failed to fetch lead dashboard stats", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  if (loading) {
+    return (
+      <Container fluid className="p-4 text-center">
+        <Spinner animation="border" />
+      </Container>
+    );
+  }
+
+  // Main stat cards
+  const cards = [
+    { title: "Active Requirements", value: stats?.activeRequirements || 0, key: "activeRequirementsList", icon: "bi-briefcase", list: stats?.activeRequirementsList || [] },
+    { title: "Closed Requirements", value: stats?.closedRequirements || 0, key: "closedRequirementsList", icon: "bi-check-circle", list: stats?.closedRequirementsList || [] },
+    { title: "Forwarded to Sales", value: stats?.forwardedToSales || 0, key: "forwardedToSalesList", icon: "bi-send", list: stats?.forwardedToSalesList || [] },
+    { title: "Active Candidates", value: stats?.activeCandidates || 0, key: "activeCandidatesList", icon: "bi-people", list: stats?.activeCandidatesList || [] },
+    { title: "Inactive Candidates", value: stats?.inactiveCandidates || 0, key: "inactiveCandidatesList", icon: "bi-person-x", list: stats?.inactiveCandidatesList || [] },
   ];
 
-  const recentActivity = [
-    { title: "New application", name: "Sarah Johnson", role: "Frontend Developer", time: "2 hours ago" },
-    { title: "Interview scheduled", name: "Michael Chen", role: "Product Manager", time: "5 hours ago" },
-    { title: "Candidate rejected", name: "Emily Rodriguez", role: "UX Designer", time: "Yesterday" },
-    { title: "Offer sent", name: "David Kim", role: "Data Scientist", time: "Yesterday" },
-  ];
+  const candidateStatuses = {};
+  ALL_STATUSES.forEach((status) => {
+    candidateStatuses[status] = stats?.candidateStats?.[status] || { count: 0, list: [] };
+  });
 
-  const pipeline = [
-    { stage: "Applied", count: 145 },
-    { stage: "Screening", count: 87 },
-    { stage: "Interview", count: 32 },
-    { stage: "Offer", count: 12 },
-    { stage: "Hired", count: 5 },
-  ];
+  const handleCardClick = (key, title, list = []) => {
+    setSelectedList(list);
+    setListTitle(title);
+    setShowModal(true);
+  };
+
+  const renderTableRows = () =>
+    selectedList.map((item) => (
+      <tr key={item._id}>
+        {listTitle.includes("Requirement") && (
+          <>
+            <td>{item.requirementId}</td>
+            <td>{item.title}</td>
+            <td>{item.client}</td>
+            <td>{item.priority}</td>
+            <td>{item.duration || "N/A"}</td>
+            <td>{item.recruiterAssignedTo?.join(", ") || "N/A"}</td>
+          </>
+        )}
+        {listTitle.includes("Candidate") && (
+          <>
+            <td>{item.name}</td>
+            <td>{item.email}</td>
+            <td>
+              {Array.isArray(item.requirementId)
+                ? item.requirementId.map(r => r.title || r).join(", ")
+                : item.requirementId?.title || item.requirementId || "N/A"}
+            </td>
+            <td>{item.candidate_update || "N/A"}</td>
+            <td>{item.isActive || "not available"}</td>
+          </>
+        )}
+      </tr>
+    ));
 
   return (
     <Container fluid className="p-4">
-      <h4 className="fw-bold mb-4">Dashboard</h4>
+      <h4 className="fw-bold mb-4">Lead Dashboard</h4>
 
-      {/* Stat Cards */}
+      {/* Main Stat Cards */}
       <Row className="mb-4">
-        {stats.map((s, idx) => (
+        {cards.map((card, idx) => (
           <Col md={3} key={idx}>
-            <Card className="mb-3 shadow-sm">
+            <Card
+              className="mb-3 shadow-sm"
+              style={{ cursor: "pointer" }}
+              onClick={() => handleCardClick(card.key, card.title, card.list)}
+            >
               <Card.Body>
                 <div className="d-flex justify-content-between align-items-center mb-2">
-                  <Card.Title className="mb-0 fs-6">{s.title}</Card.Title>
-                  <i className={`bi ${s.icon} fs-4 text-primary`}></i>
+                  <Card.Title className="mb-0 fs-6">{card.title}</Card.Title>
+                  <i className={`bi ${card.icon} fs-4 text-primary`}></i>
                 </div>
-                <h4 className="fw-bold">{s.value}</h4>
-                <small className="text-success">{s.change} from last month</small>
+                <h4 className="fw-bold">{card.value}</h4>
               </Card.Body>
             </Card>
           </Col>
         ))}
       </Row>
 
-      {/* Activity + Pipeline */}
-      <Row>
-        {/* Recent Activity */}
-        <Col md={6}>
-          <Card className="mb-4 shadow-sm">
-            <Card.Body>
-              <Card.Title className="mb-3">Recent Activity</Card.Title>
-              <ListGroup variant="flush">
-                {recentActivity.map((item, idx) => (
-                  <ListGroup.Item key={idx}>
-                    <span className="text-primary fw-semibold">{item.title}</span><br />
-                    <span>{item.name} • {item.role}</span><br />
-                    <small className="text-muted">{item.time}</small>
-                  </ListGroup.Item>
-                ))}
-              </ListGroup>
-            </Card.Body>
-          </Card>
-        </Col>
-
-        {/* Hiring Pipeline */}
-        <Col md={6}>
-          <Card className="mb-4 shadow-sm">
-            <Card.Body>
-              <Card.Title className="mb-3">Hiring Pipeline</Card.Title>
-              <ProgressBar now={60} variant="primary" className="mb-3" />
-              <div className="d-flex justify-content-between text-center">
-                {pipeline.map((step, idx) => (
-                  <div key={idx}>
-                    <div className="fw-semibold">{step.stage}</div>
-                    <small className="text-muted">{step.count}</small>
-                  </div>
-                ))}
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
+      {/* Candidate Status Cards */}
+      <Row className="mb-4">
+        {Object.entries(candidateStatuses).map(([status, obj], idx) => (
+          <Col md={3} key={idx}>
+            <Card
+              className="mb-3 shadow-sm text-center"
+              style={{ cursor: "pointer" }}
+              onClick={() => handleCardClick(status, `Candidates - ${status}`, obj?.list || [])}
+            >
+              <Card.Body>
+                <Card.Title className="mb-1 fs-6">{status.replace(/-/g, " ")}</Card.Title>
+                <h4 className="fw-bold">{obj?.count || 0}</h4>
+              </Card.Body>
+            </Card>
+          </Col>
+        ))}
       </Row>
+
+      {/* Modal for Selected List */}
+      <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>{listTitle}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="table-responsive">
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  {listTitle.includes("Requirement") && (
+                    <>
+                      <th>Requirement ID</th>
+                      <th>Title</th>
+                      <th>Client</th>
+                      <th>Priority</th>
+                      <th>Duration</th>
+                      <th>Recruiters</th>
+                    </>
+                  )}
+                  {listTitle.includes("Candidate") && (
+                    <>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Requirement</th>
+                      <th>Candidate Update</th>
+                      <th>Is Active</th>
+                    </>
+                  )}
+                </tr>
+              </thead>
+              <tbody>{renderTableRows()}</tbody>
+            </Table>
+          </div>
+        </Modal.Body>
+      </Modal>
     </Container>
   );
 };
 
-export default AccountManagerDashboard;
+export default LeadDashboard;

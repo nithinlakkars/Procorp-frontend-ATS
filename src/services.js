@@ -156,15 +156,30 @@ export const submitCandidate = async (data) => {
   }
 };
 
-export const forwardCandidateToSales = async (candidateId, payload) => {
+export const forwardCandidateToSales = async (candidateId, forwardedBy, forwardedToSales) => {
   try {
-    const res = await api.post(`/api/candidates/leads/forward/${candidateId}`, payload);
+    // Validate inputs
+    if (!forwardedBy || !forwardedToSales) {
+      throw new Error("❌ Both forwardedBy and forwardedToSales are required");
+    }
+
+    // Ensure forwardedToSales is always an array
+    const salesEmails = Array.isArray(forwardedToSales) ? forwardedToSales : [forwardedToSales];
+
+    const res = await api.post(`/api/candidates/leads/forward/${candidateId}`, {
+      forwardedBy,            // Lead email
+      forwardedToSales: salesEmails,  // Always send as array
+    });
+
     return res.data;
   } catch (error) {
     console.error("❌ Error forwarding candidate:", error.response?.data || error.message);
     throw error;
   }
 };
+
+
+
 
 export const getForwardedCandidates = async () => {
   try {
@@ -207,15 +222,21 @@ export const updateCandidateFields = async (candidateId, updateData) => {
 export const updateRequirementStatus = async (requirementId, newStatus) => {
   try {
     const res = await api.put("/api/requirements/update-status", {
-      requirementId,
-      requirementStatus: newStatus,
+      requirementId,       // old key
+      id: requirementId,   // new key
+      requirementStatus: newStatus, // old key
+      newStatus,                  // new key
     });
     return res.data;
   } catch (error) {
-    console.error("❌ Error updating requirement status:", error.response?.data || error.message);
+    console.error(
+      "❌ Error updating requirement status:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 };
+
 
 export const updateCandidateLeadStatus = async (candidateId, leadStatus) => {
   try {
