@@ -553,8 +553,8 @@ export default function RecruiterSubmit() {
                         <th>Requirement ID</th>
                         <th>Documents</th>
                         <th>Status</th>
+                        <th>Submitted Date</th>   {/* ✅ New Column */}
                         <th>Active</th>
-                        {/* Sales Update & Lead Update removed from main row */}
                       </tr>
                     </thead>
                     <tbody>
@@ -602,7 +602,14 @@ export default function RecruiterSubmit() {
 
                             <td>{candidate.status || "Submitted"}</td>
 
-                            {/* Active dropdown instead of checkbox */}
+                            {/* ✅ New Submitted Date Column */}
+                            <td>
+                              {candidate.createdAt
+                                ? new Date(candidate.createdAt).toLocaleDateString()
+                                : "N/A"}
+                            </td>
+
+                            {/* Active dropdown */}
                             <td>
                               <Form.Select
                                 size="sm"
@@ -613,10 +620,9 @@ export default function RecruiterSubmit() {
                                 <option value="not available">Not Available</option>
                               </Form.Select>
                             </td>
-
                           </tr>
 
-                          {/* Expanded Row with extra details */}
+                          {/* Expanded Row */}
                           {expandedReq === candidate._id && (
                             <tr>
                               <td colSpan="9">
@@ -637,8 +643,6 @@ export default function RecruiterSubmit() {
                                     <strong>Location:</strong>{" "}
                                     {candidate.currentLocation || "N/A"}
                                   </p>
-
-                                  {/* ✅ Sales & Lead Update visible only here */}
                                   <p>
                                     <strong>Sales Update:</strong>{" "}
                                     {candidate.candidate_update || "Submitted"}
@@ -656,7 +660,7 @@ export default function RecruiterSubmit() {
                     </tbody>
                   </table>
 
-                  {/* Pagination Controls */}
+                  {/* Pagination */}
                   <div className="d-flex justify-content-between align-items-center mt-2">
                     <div>
                       Showing {indexOfFirstSubmitted + 1}–
@@ -685,6 +689,7 @@ export default function RecruiterSubmit() {
                   </div>
                 </div>
               )}
+
 
 
 
