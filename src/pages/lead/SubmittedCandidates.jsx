@@ -119,10 +119,17 @@ export default function SubmittedCandidates({
     submittedDate: "Submitted Date", // Added label
   };
 
-  const indexOfLast = currentPage * candidatesPerPage;
-  const indexOfFirst = indexOfLast - candidatesPerPage;
-  const currentCandidates = candidates.slice(indexOfFirst, indexOfLast);
-  const totalPages = Math.ceil(candidates.length / candidatesPerPage);
+// Sort candidates so latest submission comes first
+const sortedCandidates = [...candidates].sort((a, b) => {
+  const dateA = new Date(a.createdAt || 0);
+  const dateB = new Date(b.createdAt || 0);
+  return dateB - dateA; // descending: newest first
+});
+
+const indexOfLast = currentPage * candidatesPerPage;
+const indexOfFirst = indexOfLast - candidatesPerPage;
+const currentCandidates = sortedCandidates.slice(indexOfFirst, indexOfLast);
+const totalPages = Math.ceil(sortedCandidates.length / candidatesPerPage);
 
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
