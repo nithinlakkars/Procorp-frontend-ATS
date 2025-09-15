@@ -72,12 +72,14 @@ export default function RecruiterSubmit() {
     try {
       const data = new FormData();
 
+      // Validate resumes
       if (!formData.resumes || formData.resumes.length === 0) {
         alert("Please upload at least one resume.");
         setLoading(false);
         return;
       }
 
+      // Append resumes
       for (let i = 0; i < formData.resumes.length; i++) {
         data.append("resume", formData.resumes[i]);
       }
@@ -93,20 +95,30 @@ export default function RecruiterSubmit() {
         data.append("workAuthorization", formData.workAuthorization.join(","));
       }
 
-      // Leads
+      // Forward to Leads
       if (formData.forwardToLeads && formData.forwardToLeads.length > 0) {
         formData.forwardToLeads.forEach((lead) => data.append("forwardToLeads[]", lead));
       }
 
+      // Submit candidate
       const response = await submitCandidate(data);
+      console.log("Submit response:", response);
 
-      if (response?.candidate) {
-        // ✅ Prepend the new submission to the top of the list
-        setSubmittedCandidates((prev) => [response.candidate, ...prev]);
+      // ✅ Check for candidateId instead of candidate
+      if (response?.candidateId) {
+        setSubmittedCandidates((prev) => [
+          {
+            candidateId: response.candidateId,
+            folderId: response.folderId,
+            folderUrl: response.folderUrl,
+            message: response.message,
+          },
+          ...prev,
+        ]);
 
-        alert("✅ Candidate submitted successfully");
+        alert(response.message || "✅ Candidate submitted successfully");
         setShowModal(false);
-        setFormData({ ...formData, resumes: [] }); // Reset resumes if needed
+        setFormData({ ...formData, resumes: [] });
       } else {
         alert("❌ Submission failed. Please try again.");
       }
