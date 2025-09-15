@@ -67,17 +67,11 @@ export default function ForwardedCandidates({ onCountUpdate }) {
     }
   };
 
-  // ✅ Removed forwardedBy & addedBy from visibleFields
-  const visibleFields = [
-    "candidateId",
-    "name",
-    "role",
-    "requirementId",
-  ];
+  const visibleFields = ["candidateId", "name", "role", "requirementId"];
 
   const hiddenFields = [
-    "forwardedBy", // moved here
-    "addedBy",     // moved here
+    "forwardedBy",
+    "addedBy",
     "email",
     "phone",
     "rate",
@@ -130,6 +124,7 @@ export default function ForwardedCandidates({ onCountUpdate }) {
     "clientdetails",
   ];
 
+  // Filter candidates by search query
   const filteredCandidates = forwardedCandidates.filter((candidate) => {
     const query = searchQuery.toLowerCase();
     return searchableFields.some((field) =>
@@ -137,8 +132,13 @@ export default function ForwardedCandidates({ onCountUpdate }) {
     );
   });
 
-  const totalPages = Math.ceil(filteredCandidates.length / pageSize);
-  const paginatedCandidates = filteredCandidates.slice(
+  // Sort so newest forwarded candidates appear at the top
+  const sortedCandidates = [...filteredCandidates].sort((a, b) =>
+    b._id.localeCompare(a._id)
+  );
+
+  const totalPages = Math.ceil(sortedCandidates.length / pageSize);
+  const paginatedCandidates = sortedCandidates.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize
   );
@@ -176,29 +176,31 @@ export default function ForwardedCandidates({ onCountUpdate }) {
               paginatedCandidates.map((candidate) => (
                 <React.Fragment key={candidate._id}>
                   <tr>
-                    {visibleFields.map((field, i) => {
-                      if (field === "name") {
-                        return (
-                          <td key={i}>
-                            <Button
-                              variant="link"
-                              className="p-0 text-decoration-none"
-                              onClick={() => toggleExpand(candidate._id)}
-                            >
-                              {candidate[field] || "N/A"}
-                            </Button>
-                          </td>
-                        );
-                      } else {
-                        return <td key={i}>{candidate[field] || "N/A"}</td>;
-                      }
-                    })}
+                    {visibleFields.map((field, i) =>
+                      field === "name" ? (
+                        <td key={i}>
+                          <Button
+                            variant="link"
+                            className="p-0 text-decoration-none"
+                            onClick={() => toggleExpand(candidate._id)}
+                          >
+                            {candidate[field] || "N/A"}
+                          </Button>
+                        </td>
+                      ) : (
+                        <td key={i}>{candidate[field] || "N/A"}</td>
+                      )
+                    )}
                     <td>
                       <span
-                        className={`badge ${candidate.isActive === "available" ? "bg-success" : "bg-secondary"
+                        className={`badge ${candidate.isActive === "available"
+                            ? "bg-success"
+                            : "bg-secondary"
                           }`}
                       >
-                        {candidate.isActive === "available" ? "Available" : "Not Available"}
+                        {candidate.isActive === "available"
+                          ? "Available"
+                          : "Not Available"}
                       </span>
                     </td>
 
@@ -257,10 +259,7 @@ export default function ForwardedCandidates({ onCountUpdate }) {
               ))
             ) : (
               <tr>
-                <td
-                  colSpan={visibleFields.length + 3}
-                  className="text-center text-muted"
-                >
+                <td colSpan={visibleFields.length + 3} className="text-center text-muted">
                   No matching candidates found.
                 </td>
               </tr>
